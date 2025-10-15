@@ -12,135 +12,104 @@
   font-family: 'Lexend', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  --terminal-green: #00ff00;
-  --terminal-green-dark: #00cc00;
-  --terminal-green-darker: #009900;
-  --terminal-green-dim: #006600;
-  --terminal-bg: #000000;
-  --terminal-text: #e0e0e0;
-  --terminal-text-bright: #ffffff;
+  
+  /* Windows 95/98 colors */
+  --win-gray: #c0c0c0;
+  --win-dark-gray: #808080;
+  --win-light-gray: #dfdfdf;
+  --win-white: #ffffff;
+  --win-black: #000000;
+  --win-blue: #000080;
+  --win-light-blue: #0000ff;
+  --win-title-blue: #000080;
+  --win-title-gradient: linear-gradient(90deg, #000080, #1084d0);
+  --win-desktop: #008080;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: var(--terminal-bg);
-  color: var(--terminal-text-bright);
+  background-color: var(--win-desktop);
+  color: var(--win-black);
+  font-family: 'Lexend', sans-serif;
 }
 
 @layer utilities {
-  .text-shadow-glow {
-    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
-  }
-  
-  .terminal-glow {
-    text-shadow: 
-      0 0 5px var(--terminal-green),
-      0 0 2px var(--terminal-green),
-      0 0 1px var(--terminal-green),
-      0 0 2px var(--terminal-green-dark); 
-  }
-  
-  .terminal-border {
-    border-color: var(--terminal-green);
+  /* Windows 95/98 style borders */
+  .win-border-outset {
+    border-top: 2px solid var(--win-white);
+    border-left: 2px solid var(--win-white);
+    border-right: 2px solid var(--win-black);
+    border-bottom: 2px solid var(--win-black);
     box-shadow: 
-      0 0 5px var(--terminal-green-dim),
-      inset 0 0 5px var(--terminal-green-dim);
+      inset 1px 1px 0 var(--win-light-gray),
+      inset -1px -1px 0 var(--win-dark-gray);
   }
   
-  .scanline {
-    position: relative;
-    overflow: hidden;
-  }
-  
-  /* Horizontal scanlines */
-  .scanline::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: repeating-linear-gradient(
-      to bottom,
-      transparent 0px,
-      transparent 1px,
-      rgba(0, 0, 0, 0.3) 1px,
-      rgba(0, 0, 0, 0.3) 2px
-    );
-    pointer-events: none;
-    z-index: 10;
-  }
-  
-  /* Moving scan line effect */
-  .scanline::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      to bottom,
-      transparent 0%,
-      rgba(0, 255, 0, 0.05) 50%,
-      transparent 100%
-    );
-    background-size: 100% 200%;
-    pointer-events: none;
-    animation: scanline-move 12s linear infinite;
-    z-index: 9;
-  }
-  
-  @keyframes scanline-move {
-    0% {
-      background-position: 0% 0%;
-    }
-    100% {
-      background-position: 0% 100%;
-    }
-  }
-  
-  .crt-effect {
-    animation: flicker 2s infinite;
-    position: relative;
-  }
-  
-  /* CRT screen curvature and vignette */
-  .crt-effect::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(
-      ellipse at center,
-      transparent 0%,
-      transparent 60%,
-      rgba(0, 0, 0, 0.3) 100%
-    );
-    pointer-events: none;
-    z-index: 5;
-  }
-  
-  @keyframes flicker {
-    0% {
-      opacity: 0.97;
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0.97;
-    }
-  }
-  
-  /* Screen glow effect */
-  .screen-glow {
+  .win-border-inset {
+    border-top: 2px solid var(--win-black);
+    border-left: 2px solid var(--win-black);
+    border-right: 2px solid var(--win-white);
+    border-bottom: 2px solid var(--win-white);
     box-shadow: 
-      inset 0 0 100px rgba(0, 255, 0, 0.05),
-      0 0 50px rgba(0, 255, 0, 0.1);
+      inset 1px 1px 0 var(--win-dark-gray),
+      inset -1px -1px 0 var(--win-light-gray);
+  }
+  
+  .win-button {
+    background: var(--win-gray);
+    border-top: 2px solid var(--win-white);
+    border-left: 2px solid var(--win-white);
+    border-right: 2px solid var(--win-black);
+    border-bottom: 2px solid var(--win-black);
+    box-shadow: 
+      inset 1px 1px 0 var(--win-light-gray),
+      inset -1px -1px 0 var(--win-dark-gray);
+    padding: 4px 12px;
+    font-weight: 600;
+  }
+  
+  .win-button:active {
+    border-top: 2px solid var(--win-black);
+    border-left: 2px solid var(--win-black);
+    border-right: 2px solid var(--win-white);
+    border-bottom: 2px solid var(--win-white);
+    box-shadow: 
+      inset 1px 1px 0 var(--win-dark-gray);
+  }
+  
+  .win-title-bar {
+    background: var(--win-title-gradient);
+    color: white;
+    font-weight: bold;
+    padding: 2px 4px;
+  }
+  
+  .win-window {
+    background: var(--win-gray);
+    border-top: 3px solid var(--win-light-gray);
+    border-left: 3px solid var(--win-light-gray);
+    border-right: 3px solid var(--win-black);
+    border-bottom: 3px solid var(--win-black);
+    box-shadow: 
+      inset 1px 1px 0 var(--win-white),
+      inset -2px -2px 0 var(--win-dark-gray),
+      2px 2px 10px rgba(0, 0, 0, 0.3);
+  }
+  
+  .win-panel-inset {
+    background: white;
+    border-top: 2px solid var(--win-dark-gray);
+    border-left: 2px solid var(--win-dark-gray);
+    border-right: 2px solid var(--win-white);
+    border-bottom: 2px solid var(--win-white);
+    box-shadow: inset -1px -1px 0 var(--win-light-gray);
+  }
+  
+  .win-separator {
+    height: 2px;
+    background: var(--win-dark-gray);
+    border-bottom: 1px solid var(--win-white);
   }
   
   .pixel-border {

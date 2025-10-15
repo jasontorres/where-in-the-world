@@ -198,51 +198,68 @@ const ZaldyCoGame = () => {
 
   if (!gameState.gameStarted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4 crt-effect scanline">
-        <div className="max-w-4xl w-full bg-black border-8 border-green-500 terminal-border p-8 shadow-2xl">
-          <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold mb-2 text-green-400 font-orbitron ">
-              WHERE IN THE WORLD IS
-            </h1>
-            <h2 className="text-5xl font-black mb-4 text-green-500 font-orbitron ">
-              ZALDY CO?
-            </h2>
-            <div className="bg-green-950 border-4 border-green-600 p-3 mb-4">
-              <p className="text-white font-bold text-2xl">
-                A POLITICAL SATIRE INVESTIGATION
-              </p>
+      <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
+        <div className="max-w-4xl w-full win-window">
+          {/* Title Bar */}
+          <div className="win-title-bar flex items-center justify-between px-2 py-1">
+            <div className="flex items-center gap-2">
+              <span className="text-white font-bold">Where in the World is Zaldy Co?</span>
+            </div>
+            <div className="flex gap-1">
+              <button className="w-6 h-6 win-button text-xs font-bold">_</button>
+              <button className="w-6 h-6 win-button text-xs font-bold">□</button>
+              <button className="w-6 h-6 win-button text-xs font-bold">✕</button>
             </div>
           </div>
           
-          <div className="bg-green-950 border-4 border-green-600 p-4 mb-4 text-xl">
-            <h3 className="font-bold text-2xl mb-3 text-green-400 font-orbitron">CASE FILE: OPERATION BAHA FLOOD</h3>
-            <div className="text-gray-200 space-y-1">
-              <p><span className="text-green-300 font-orbitron">SUSPECT:</span> Congressman Zaldy Co</p>
-              <p><span className="text-green-300 font-orbitron">POSITION:</span> Former Chair, House Appropriations Committee</p>
-              <p><span className="text-green-300 font-orbitron">CHARGES:</span> Plunder, Rigged Infrastructure Deals, Ghost Projects</p>
-              <p><span className="text-green-300 font-orbitron">EMBEZZLED:</span> Over P100,000,000,000</p>
-              <p><span className="text-green-300 font-orbitron">ASSETS:</span> $36M Gulfstream jet, $16M Helicopter</p>
-              <p><span className="text-green-300 font-orbitron">LAST SEEN:</span> Left USA August 26, 2025</p>
+          {/* Window Content */}
+          <div className="p-6">
+            <div className="text-center mb-6">
+              <h1 className="text-4xl font-bold mb-2 text-blue-900">
+                WHERE IN THE WORLD IS
+              </h1>
+              <h2 className="text-5xl font-black mb-4" style={{color: 'var(--win-blue)'}}>
+                ZALDY CO?
+              </h2>
+              <div className="win-panel-inset p-4 mb-4">
+                <p className="text-lg text-black font-bold">
+                  A POLITICAL SATIRE INVESTIGATION
+                </p>
+              </div>
+            </div>
+
+            <div className="win-panel-inset p-4 mb-4">
+              <h3 className="font-bold text-xl mb-3" style={{color: 'var(--win-blue)'}}>CASE FILE: OPERATION BAHA FLOOD</h3>
+              <div className="text-black space-y-1">
+                <p><span className="font-bold">SUSPECT:</span> Congressman Zaldy Co</p>
+                <p><span className="font-bold">POSITION:</span> Former Chair, House Appropriations Committee</p>
+                <p><span className="font-bold">CHARGES:</span> Plunder, Rigged Infrastructure Deals, Ghost Projects</p>
+                <p><span className="font-bold">EMBEZZLED:</span> Over P100,000,000,000</p>
+                <p><span className="font-bold">ASSETS:</span> $36M Gulfstream jet, $16M Helicopter</p>
+                <p><span className="font-bold">LAST SEEN:</span> Left USA August 26, 2025</p>
+              </div>
+            </div>
+
+            <div className="win-panel-inset p-4 mb-4">
+              <h3 className="font-bold text-xl mb-3" style={{color: 'var(--win-blue)'}}>HOW TO PLAY</h3>
+              <ul className="space-y-1 text-black">
+                <li>• Interview witnesses to gather clues</li>
+                <li>• Travel between cities following the trail</li>
+                <li>• Collect evidence about Zaldy Co</li>
+                <li>• Find him within 7 days</li>
+                <li>• Issue arrest warrant at his location</li>
+              </ul>
+            </div>
+
+            <div className="text-center">
+              <button
+                onClick={startGame}
+                className="win-button text-xl px-8 py-3 hover:brightness-105 active:brightness-95"
+              >
+                Start Investigation
+              </button>
             </div>
           </div>
-
-          <div className="bg-green-950 border-4 border-green-600 p-4 mb-4 text-xl">
-            <h3 className="font-bold text-2xl mb-3 text-green-400 font-orbitron">HOW TO PLAY</h3>
-            <ul className="space-y-1 text-gray-200">
-              <li>- Interview witnesses to gather clues</li>
-              <li>- Travel between cities following the trail</li>
-              <li>- Collect evidence about Zaldy Co</li>
-              <li>- Issue arrest warrant when you find him</li>
-              <li>- You have 7 DAYS before trail goes cold</li>
-            </ul>
-          </div>
-
-          <button
-            onClick={startGame}
-            className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-6 border-4 border-green-500 text-2xl transition-all hover:scale-105 terminal-glow font-orbitron"
-          >
-            &gt; START INVESTIGATION
-          </button>
         </div>
       </div>
     );
@@ -252,51 +269,56 @@ const ZaldyCoGame = () => {
 
   if (gameState.gameOver) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center p-4 crt-effect scanline">
-        <div className="max-w-3xl w-full bg-black border-8 border-green-500 terminal-border p-8">
-          <div className="text-center">
-            {gameState.gameWon ? (
-              <>
-                <div className="text-6xl mb-4 animate-bounce text-green-400">★</div>
-                <h2 className="text-5xl font-bold text-green-400 mb-4 terminal-glow font-orbitron">CASE CLOSED!</h2>
-              </>
-            ) : (
-              <>
-                <div className="text-6xl mb-4 text-green-600">✖</div>
-                <h2 className="text-5xl font-bold text-green-600 mb-4 terminal-glow font-orbitron">CASE COLD</h2>
-              </>
-            )}
-            
-            <div className="bg-green-950 border-4 border-green-600 p-6 mb-6">
-              {gameState.conversation && (
-                <Typewriter 
-                  text={gameState.conversation.text} 
-                  speed={10}
-                  className="text-xl text-gray-200 leading-relaxed text-left"
-                  onComplete={() => setGameState({...gameState, typewriterComplete: true})}
-                />
+      <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
+        <div className="max-w-3xl w-full win-window">
+          <div className="win-title-bar px-2 py-1">
+            <span className="text-white font-bold">{gameState.gameWon ? 'Case Closed!' : 'Case File - Closed'}</span>
+          </div>
+          <div className="p-8" style={{background: 'var(--win-gray)'}}>
+            <div className="text-center">
+              {gameState.gameWon ? (
+                <>
+                  <div className="text-6xl mb-4 animate-bounce">🏆</div>
+                  <h2 className="text-4xl font-bold mb-4" style={{color: 'var(--win-blue)'}}>CASE CLOSED!</h2>
+                </>
+              ) : (
+                <>
+                  <div className="text-6xl mb-4">⚠️</div>
+                  <h2 className="text-4xl font-bold mb-4 text-red-600">CASE COLD</h2>
+                </>
+              )}
+              
+              <div className="win-panel-inset p-6 mb-6">
+                {gameState.conversation && (
+                  <Typewriter 
+                    text={gameState.conversation.text} 
+                    speed={10}
+                    className="text-sm text-black leading-relaxed text-left"
+                    onComplete={() => setGameState({...gameState, typewriterComplete: true})}
+                  />
+                )}
+              </div>
+
+              {gameState.typewriterComplete && (
+                <>
+                  <div className="win-panel-inset p-4 mb-6">
+                    <h3 className="font-bold mb-3 text-lg" style={{color: 'var(--win-blue)'}}>INVESTIGATION SUMMARY</h3>
+                    <div className="text-black space-y-1 text-base">
+                      <p><span className="font-bold">Days Used:</span> {7 - gameState.daysRemaining} of 7</p>
+                      <p><span className="font-bold">Locations Visited:</span> {gameState.visitedLocations.length}</p>
+                      <p><span className="font-bold">Clues Collected:</span> {gameState.cluesCollected.length}</p>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="win-button text-xl px-8 py-3 font-bold hover:brightness-105"
+                  >
+                    Start New Case
+                  </button>
+                </>
               )}
             </div>
-
-            {gameState.typewriterComplete && (
-              <>
-                <div className="bg-green-950 border-4 border-green-600 p-4 mb-6">
-                  <h3 className="font-bold mb-3 text-green-400 text-2xl font-orbitron">INVESTIGATION SUMMARY</h3>
-                  <div className="text-gray-200 space-y-1 text-xl">
-                    <p>Days Used: {7 - gameState.daysRemaining} of 7</p>
-                    <p>Locations Visited: {gameState.visitedLocations.length}</p>
-                    <p>Clues Collected: {gameState.cluesCollected.length}</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => window.location.reload()}
-                  className="bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-8 border-4 border-green-500 text-2xl transition-all hover:scale-105 terminal-glow font-orbitron"
-                >
-                  &gt; NEW CASE
-                </button>
-              </>
-            )}
           </div>
         </div>
       </div>
@@ -304,198 +326,210 @@ const ZaldyCoGame = () => {
   }
 
   return (
-    <div className="min-h-screen bg-black p-2 crt-effect">
-      <div className="max-w-7xl mx-auto bg-black border-8 border-green-500 terminal-border shadow-2xl scanline">
-        <div className="bg-green-950 border-b-4 border-green-600 p-3">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-green-400 font-orbitron">WHERE IS ZALDY CO?</h1>
-              <p className="text-lg text-gray-400">INTERPOL AGENT TERMINAL v1.0</p>
+    <div className="min-h-screen" style={{background: 'var(--win-desktop)'}}>
+      <div className="max-w-7xl mx-auto p-4">
+        <div className="win-window mb-4">
+          <div className="win-title-bar flex items-center justify-between px-2 py-1">
+            <div className="flex items-center gap-2">
+              <span className="text-white font-bold">INTERPOL Agent Terminal v1.0 - Where is Zaldy Co?</span>
             </div>
-            <div className="text-right bg-green-900 border-2 border-green-600 px-4 py-1">
-              <p className="text-lg text-green-400 font-orbitron">DAYS LEFT</p>
-              <p className="text-5xl font-bold text-green-300 animate-pulse font-orbitron">{gameState.daysRemaining}</p>
+            <div className="flex gap-1">
+              <button className="w-6 h-6 win-button text-xs font-bold">_</button>
+              <button className="w-6 h-6 win-button text-xs font-bold">□</button>
+              <button className="w-6 h-6 win-button text-xs font-bold">✕</button>
+            </div>
+          </div>
+          <div className="p-3" style={{background: 'var(--win-gray)'}}>
+            <div className="flex justify-between items-center">
+              <div>
+                <h1 className="text-2xl font-bold" style={{color: 'var(--win-blue)'}}>WHERE IS ZALDY CO?</h1>
+                <p className="text-sm text-gray-700">Investigation Active</p>
+              </div>
+              <div className="win-panel-inset px-4 py-2 text-center">
+                <p className="text-sm font-bold" style={{color: 'var(--win-blue)'}}>DAYS LEFT</p>
+                <p className="text-3xl font-bold text-red-600">{gameState.daysRemaining}</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 min-h-[600px]">
-          <div className="bg-black border-r-4 border-green-700 p-4">
-            <div className="mb-4">
-              <div className="bg-green-950 border-2 border-green-600 p-2 mb-2">
-                <h2 className="text-2xl font-bold text-white font-orbitron">
-                  {currentLocation.name}
-                </h2>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[600px]">
+          {/* Left Panel - Location & Evidence */}
+          <div className="win-window flex flex-col">
+            <div className="win-title-bar px-2 py-1">
+              <span className="text-white font-bold">Current Location - {currentLocation.name}</span>
+            </div>
+            <div className="p-4 flex-1 flex flex-col" style={{background: 'var(--win-gray)'}}>
               
-              <div className="border-4 border-green-600 mb-3">
+              <div className="win-border-inset mb-3">
                 <img 
                   src={currentLocation.image} 
                   alt={currentLocation.name}
-                  className="w-full h-64 object-cover pixel-border opacity-60 mix-blend-screen"
-                  style={{filter: 'sepia(100%) hue-rotate(60deg) saturate(300%)'}}
+                  className="w-full h-48 object-cover"
                 />
               </div>
 
-              <div className="bg-green-950 border-2 border-green-600 p-3">
-                <p className="text-lg text-gray-200">
+              <div className="win-panel-inset p-3 mb-3">
+                <p className="text-sm text-black">
                   {currentLocation.description}
                 </p>
               </div>
-            </div>
 
-            <div className="bg-green-950 border-4 border-green-600 p-3">
-              <h3 className="font-bold text-xl mb-2 text-green-400 font-orbitron">EVIDENCE DOSSIER</h3>
-              
-              <div className="space-y-2 text-base bg-black border-2 border-green-700 p-2">
-                <div>
-                  <p className="font-bold text-green-300 font-orbitron">APPEARANCE:</p>
-                  <p className="text-gray-200 pl-2">
-                    {gameState.evidence.appearance || "[UNKNOWN]"}
-                  </p>
+              {/* Evidence Dossier */}
+              <div className="win-panel-inset p-3 flex-1">
+                <h3 className="font-bold text-base mb-2" style={{color: 'var(--win-blue)'}}>EVIDENCE DOSSIER</h3>
+                <div className="space-y-2 text-sm">
+                  <div>
+                    <p className="font-bold text-black">APPEARANCE:</p>
+                    <p className="text-gray-700 pl-2 text-xs">
+                      {gameState.evidence.appearance || "[UNKNOWN]"}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="font-bold text-black">HOBBY:</p>
+                    <p className="text-gray-700 pl-2 text-xs">
+                      {gameState.evidence.hobby || "[UNKNOWN]"}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="font-bold text-black">VEHICLE:</p>
+                    <p className="text-gray-700 pl-2 text-xs">
+                      {gameState.evidence.vehicle || "[UNKNOWN]"}
+                    </p>
+                  </div>
+                  
+                  <div>
+                    <p className="font-bold text-black">TRAIT:</p>
+                    <p className="text-gray-700 pl-2 text-xs">
+                      {gameState.evidence.trait || "[UNKNOWN]"}
+                    </p>
+                  </div>
                 </div>
-                
-                <div>
-                  <p className="font-bold text-green-300 font-orbitron">HOBBY:</p>
-                  <p className="text-gray-200 pl-2">
-                    {gameState.evidence.hobby || "[UNKNOWN]"}
-                  </p>
+                <div className="mt-2 pt-2 border-t border-gray-400">
+                  <p className="text-xs font-bold text-center" style={{color: 'var(--win-blue)'}}>CLUES: {gameState.cluesCollected.length}</p>
                 </div>
-                
-                <div>
-                  <p className="font-bold text-green-300 font-orbitron">VEHICLE:</p>
-                  <p className="text-gray-200 pl-2">
-                    {gameState.evidence.vehicle || "[UNKNOWN]"}
-                  </p>
-                </div>
-                
-                <div>
-                  <p className="font-bold text-green-300 font-orbitron">TRAIT:</p>
-                  <p className="text-gray-200 pl-2">
-                    {gameState.evidence.trait || "[UNKNOWN]"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-2 text-base text-gray-300 font-orbitron">
-                CLUES COLLECTED: {gameState.cluesCollected.length}
               </div>
             </div>
           </div>
 
-          <div className="bg-black p-4 flex flex-col">
-            {gameState.conversation && (
-              <div className="bg-green-950 border-4 border-green-600 p-3 mb-4 flex-shrink-0">
-                <div className="flex items-start gap-3 mb-3">
-                  {gameState.conversation.avatarUrl && (
-                    <div className="relative w-16 h-16 flex-shrink-0">
-                      <img 
-                        src={gameState.conversation.avatarUrl} 
-                        alt={gameState.conversation.speaker}
-                        className="w-16 h-16 rounded-full border-2 border-green-400 grayscale"
-                        style={{ filter: 'grayscale(100%) brightness(0.8) contrast(1.2)' }}
-                      />
-                      <div 
-                        className="absolute inset-0 rounded-full bg-green-500 mix-blend-color opacity-60 pointer-events-none"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-bold text-green-400 text-lg font-orbitron">
-                      &gt; {gameState.conversation.speaker}
-                    </p>
-                    {gameState.selectedWitness && (
-                      <p className="text-green-300 text-sm">
-                        {gameState.selectedWitness.type} • {gameState.selectedWitness.location}
-                      </p>
+          {/* Right Panel - Conversation, Actions & Witnesses */}
+          <div className="win-window flex flex-col">
+            <div className="win-title-bar px-2 py-1">
+              <span className="text-white font-bold">Investigation Console</span>
+            </div>
+            <div className="p-4 flex-1 flex flex-col" style={{background: 'var(--win-gray)'}}>
+              
+              {/* Conversation */}
+              {gameState.conversation && (
+                <div className="win-panel-inset p-3 mb-3 flex-shrink-0">
+                  <div className="flex items-start gap-3 mb-2">
+                    {gameState.conversation.avatarUrl && (
+                      <div className="w-12 h-12 flex-shrink-0">
+                        <img 
+                          src={gameState.conversation.avatarUrl} 
+                          alt={gameState.conversation.speaker}
+                          className="w-12 h-12 rounded border win-border-inset"
+                        />
+                      </div>
                     )}
+                    <div className="flex-1">
+                      <p className="font-bold text-black text-sm">
+                        {gameState.conversation.speaker}
+                      </p>
+                      {gameState.selectedWitness && (
+                        <p className="text-gray-700 text-xs">
+                          {gameState.selectedWitness.type} • {gameState.selectedWitness.location}
+                        </p>
+                      )}
+                    </div>
                   </div>
+                  <Typewriter 
+                    text={gameState.conversation.text}
+                    speed={10}
+                    className="text-xs text-black whitespace-pre-line leading-relaxed"
+                    onComplete={() => setGameState({...gameState, typewriterComplete: true})}
+                  />
                 </div>
-                <Typewriter 
-                  text={gameState.conversation.text}
-                  speed={10}
-                  className="text-lg text-gray-200 whitespace-pre-line leading-relaxed"
-                  onComplete={() => setGameState({...gameState, typewriterComplete: true})}
-                />
-              </div>
-            )}
+              )}
 
-            {gameState.typewriterComplete && (
-              <div className="space-y-3 flex-1">
-                {gameState.showTravel ? (
-                  <div className="bg-green-950 border-4 border-green-600 p-3">
-                    <h4 className="font-bold mb-2 text-green-400 text-lg font-orbitron">TRAVEL (COST: 1 DAY)</h4>
-                    <div className="space-y-2">
-                      {currentLocation.connections
-                        .filter(locKey => locKey !== gameState.previousLocation) // Don't allow going back to previous location
-                        .map(locKey => {
-                          // Check if this location is on the suspect's trail
-                          const isOnTrail = suspect.trail.includes(locKey);
-                          const trailIndex = suspect.trail.indexOf(gameState.currentLocation);
-                          const isNextInTrail = isOnTrail && trailIndex !== -1 && suspect.trail[trailIndex + 1] === locKey;
-                          
-                          return (
-                            <button
-                              key={locKey}
-                              onClick={() => travelTo(locKey)}
-                              className={`w-full text-left bg-black hover:bg-green-900 border-2 p-2 text-base transition-all hover:scale-105 ${
-                                isNextInTrail ? 'border-green-400 bg-green-950' : 'border-green-600'
-                              }`}
-                            >
-                              <p className="font-bold text-white">
-                                &gt; {locations[locKey].name}
-                                {isNextInTrail && <span className="ml-2 text-green-400 text-xs">● HOT TRAIL</span>}
-                                {isOnTrail && !isNextInTrail && <span className="ml-2 text-yellow-400 text-xs">○ ON TRAIL</span>}
-                              </p>
-                              <p className="text-gray-300 text-sm">{locations[locKey].description}</p>
-                            </button>
-                          );
-                        })}
+              {/* Actions */}
+              {gameState.typewriterComplete && (
+                <div className="space-y-2 mb-3">
+                  {gameState.showTravel ? (
+                    <div className="win-panel-inset p-3">
+                      <h4 className="font-bold mb-2 text-sm" style={{color: 'var(--win-blue)'}}>TRAVEL (COST: 1 DAY)</h4>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {currentLocation.connections
+                          .filter(locKey => locKey !== gameState.previousLocation)
+                          .map(locKey => {
+                            const isOnTrail = suspect.trail.includes(locKey);
+                            const trailIndex = suspect.trail.indexOf(gameState.currentLocation);
+                            const isNextInTrail = isOnTrail && trailIndex !== -1 && suspect.trail[trailIndex + 1] === locKey;
+                            
+                            return (
+                              <button
+                                key={locKey}
+                                onClick={() => travelTo(locKey)}
+                                className={`w-full text-left win-button p-2 text-xs hover:brightness-105 ${
+                                  isNextInTrail ? 'border-4 border-blue-600' : ''
+                                }`}
+                              >
+                                <p className="font-bold text-black">
+                                  {locations[locKey].name}
+                                  {isNextInTrail && <span className="ml-2 text-blue-600 text-xs">● HOT</span>}
+                                  {isOnTrail && !isNextInTrail && <span className="ml-2 text-gray-600 text-xs">○</span>}
+                                </p>
+                              </button>
+                            );
+                          })}
+                      </div>
                       <button
                         onClick={() => setGameState({...gameState, showTravel: false})}
-                        className="w-full bg-green-900 hover:bg-green-800 text-white py-1 px-2 border-2 border-green-600 text-base"
+                        className="w-full win-button py-1 px-2 text-sm hover:brightness-105 mt-2"
                       >
-                        &lt; CANCEL
+                        Cancel
                       </button>
                     </div>
-                  </div>
-                ) : (
-                  <>
+                  ) : (
                     <div className="space-y-2">
                       <button
                         onClick={() => setGameState({...gameState, showTravel: true})}
-                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 font-orbitron"
+                        className="w-full win-button py-2 px-4 text-sm font-bold hover:brightness-105"
                       >
-                        &gt; TRAVEL TO ANOTHER CITY
+                        Travel to Another City
                       </button>
                       
                       <button
                         onClick={attemptArrest}
-                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 font-orbitron"
+                        className="w-full win-button py-2 px-4 text-sm font-bold hover:brightness-105"
                       >
-                        &gt; ISSUE ARREST WARRANT
+                        Issue Arrest Warrant
                       </button>
                     </div>
+                  )}
+                </div>
+              )}
 
-                    <div className="bg-green-950 border-4 border-green-600 p-3 mt-3">
-                      <h3 className="font-bold text-lg mb-2 text-green-400 font-orbitron">INTERVIEW WITNESSES</h3>
-                      <div className="space-y-2">
-                        {currentLocation.witnesses.map((witness, idx) => (
-                          <button
-                            key={idx}
-                            onClick={() => interviewWitness(witness)}
-                            className="w-full text-left bg-black hover:bg-green-900 border-2 border-green-600 p-2 transition-all hover:scale-105"
-                          >
-                            <p className="font-bold text-white text-base">&gt; {witness.name}</p>
-                            <p className="text-sm text-gray-300">{witness.type} - {witness.location}</p>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                )}
+              {/* Available Witnesses */}
+              <div className="win-panel-inset p-3 flex-1">
+                <h3 className="font-bold text-base mb-2" style={{color: 'var(--win-blue)'}}>AVAILABLE WITNESSES</h3>
+                <div className="space-y-2">
+                  {currentLocation.witnesses.map((witness, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => interviewWitness(witness)}
+                      disabled={gameState.daysRemaining <= 0}
+                      className="w-full text-left win-button p-2 hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <p className="font-bold text-black text-sm">{witness.name}</p>
+                      <p className="text-gray-700 text-xs">{witness.type} • {witness.location}</p>
+                    </button>
+                  ))}
+                </div>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
