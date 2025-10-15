@@ -1,0 +1,7 @@
+{
+  "name": "where-is-zaldy-co",
+  "compatibility_date": "2025-10-15",
+  "assets": {
+    "directory": "./dist"
+  }
+}
