@@ -36,9 +36,9 @@ body {
   .terminal-glow {
     text-shadow: 
       0 0 5px var(--terminal-green),
-      0 0 10px var(--terminal-green),
-      0 0 20px var(--terminal-green),
-      0 0 30px var(--terminal-green-dark); 
+      0 0 2px var(--terminal-green),
+      0 0 1px var(--terminal-green),
+      0 0 2px var(--terminal-green-dark); 
   }
   
   .terminal-border {

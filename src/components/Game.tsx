@@ -310,7 +310,7 @@ const ZaldyCoGame = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-green-400 font-orbitron">WHERE IS ZALDY CO?</h1>
-              <p className="text-lg text-gray-400">Independent Commission for Infrastructure</p>
+              <p className="text-lg text-gray-400">INTERPOL AGENT TERMINAL v1.0</p>
             </div>
             <div className="text-right bg-green-900 border-2 border-green-600 px-4 py-1">
               <p className="text-lg text-green-400 font-orbitron">DAYS LEFT</p>
