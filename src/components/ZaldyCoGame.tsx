@@ -1,33 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Typewriter from './Typewriter';
-
-interface Witness {
-  name: string;
-  type: string;
-  location: string;
-}
-
-interface Location {
-  name: string;
-  description: string;
-  connections: string[];
-  image: string;
-  witnesses: Witness[];
-}
-
-interface Locations {
-  [key: string]: Location;
-}
-
-interface Suspect {
-  id: number;
-  name: string;
-  appearance: string;
-  hobby: string;
-  vehicle: string;
-  trait: string;
-  currentLocation: string;
-}
+import { locations, type Witness } from '../data/locations';
+import { createSuspect } from '../data/suspects';
 
 interface Conversation {
   speaker: string;
@@ -64,86 +38,8 @@ interface GameState {
 }
 
 const ZaldyCoGame = () => {
-  const locations: Locations = {
-    philippines: {
-      name: "Philippines",
-      description: "Ground zero. Where billions in flood control funds vanished while the entire nation drowns every rainy season.",
-      connections: ["singapore", "hongkong", "dubai"],
-      image: "https://images.unsplash.com/photo-1531219432768-9f540ce91ef3?w=600&h=400&fit=crop",
-      witnesses: [
-        { name: "ICI Investigator", type: "Government Official", location: "Batasang Pambansa" },
-        { name: "Flood Victim", type: "Citizen", location: "Marikina Riverbanks" },
-        { name: "House Staffer", type: "Whistleblower", location: "House of Representatives" }
-      ]
-    },
-    singapore: {
-      name: "Singapore",
-      description: "Clean streets, strict laws, and suspiciously clean money.",
-      connections: ["philippines", "hongkong", "switzerland"],
-      image: "https://images.unsplash.com/photo-1508964942454-1a56651d54ac?w=600&h=400&fit=crop",
-      witnesses: [
-        { name: "Bank Manager", type: "Banker", location: "Raffles Place" },
-        { name: "Condo Agent", type: "Real Estate", location: "Marina Bay" },
-        { name: "Filipino OFW", type: "Overseas Worker", location: "Lucky Plaza" }
-      ]
-    },
-    hongkong: {
-      name: "Hong Kong",
-      description: "Where shell companies are born and luxury condos touch the sky.",
-      connections: ["singapore", "philippines", "macau"],
-      image: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=600&h=400&fit=crop",
-      witnesses: [
-        { name: "Corporate Lawyer", type: "Legal", location: "Central District" },
-        { name: "Property Developer", type: "Real Estate", location: "Victoria Peak" },
-        { name: "Jewelry Store Owner", type: "Merchant", location: "Tsim Sha Tsui" }
-      ]
-    },
-    dubai: {
-      name: "Dubai, UAE",
-      description: "Gold, luxury cars, and questions nobody asks.",
-      connections: ["philippines", "switzerland", "singapore"],
-      image: "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=600&h=400&fit=crop",
-      witnesses: [
-        { name: "Luxury Car Dealer", type: "Merchant", location: "Sheikh Zayed Road" },
-        { name: "Hotel Concierge", type: "Hospitality", location: "Burj Al Arab" },
-        { name: "Filipino Domestic Worker", type: "OFW", location: "Deira" }
-      ]
-    },
-    switzerland: {
-      name: "Zurich, Switzerland",
-      description: "Neutral territory. Secret accounts. No questions asked.",
-      connections: ["singapore", "dubai", "hongkong"],
-      image: "https://images.unsplash.com/photo-1519659528534-7fd733a832a0?w=600&h=400&fit=crop",
-      witnesses: [
-        { name: "Private Banker", type: "Finance", location: "Bahnhofstrasse" },
-        { name: "Watch Dealer", type: "Merchant", location: "Luxury Boutique" },
-        { name: "Hotel Manager", type: "Hospitality", location: "Luxury Hotel" }
-      ]
-    },
-    macau: {
-      name: "Macau",
-      description: "Where fortunes are made, lost, and laundered.",
-      connections: ["hongkong", "singapore", "philippines"],
-      image: "https://images.unsplash.com/photo-1558862107-d49ef2a04d72?w=600&h=400&fit=crop",
-      witnesses: [
-        { name: "Casino Host", type: "Gaming", location: "Venetian Macau" },
-        { name: "VIP Room Manager", type: "Gaming", location: "Grand Lisboa" },
-        { name: "Junket Operator", type: "Gaming", location: "Casino Floor" }
-      ]
-    }
-  };
-
-  const suspects: Suspect[] = [
-    {
-      id: 1,
-      name: "Zaldy Co",
-      appearance: "Portly congressman, often in barong, round face with prominent jowls",
-      hobby: "Collecting luxury aircraft and helicopters",
-      vehicle: "Travels by private Gulfstream 350 jet",
-      trait: "Claims to live modestly despite owning $50M+ in luxury aircraft",
-      currentLocation: "dubai"
-    }
-  ];
+  // Create suspect with random location once per game
+  const suspect = useMemo(() => createSuspect(), []);
 
   const [gameState, setGameState] = useState<GameState>({
     currentLocation: "philippines",
@@ -164,8 +60,6 @@ const ZaldyCoGame = () => {
     },
     typewriterComplete: false
   });
-
-  const suspect = suspects[0];
 
   const startGame = () => {
     setGameState({
