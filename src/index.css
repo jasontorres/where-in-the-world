@@ -38,7 +38,7 @@ body {
       0 0 5px var(--terminal-green),
       0 0 10px var(--terminal-green),
       0 0 20px var(--terminal-green),
-      0 0 40px var(--terminal-green-dark);
+      0 0 30px var(--terminal-green-dark); 
   }
   
   .terminal-border {
@@ -88,7 +88,7 @@ body {
     );
     background-size: 100% 200%;
     pointer-events: none;
-    animation: scanline-move 8s linear infinite;
+    animation: scanline-move 12s linear infinite;
     z-index: 9;
   }
   
@@ -102,7 +102,7 @@ body {
   }
   
   .crt-effect {
-    animation: flicker 0.15s infinite;
+    animation: flicker 2s infinite;
     position: relative;
   }
   

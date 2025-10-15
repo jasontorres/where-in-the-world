@@ -26,6 +26,7 @@ interface Evidence {
 
 interface GameState {
   currentLocation: string;
+  previousLocation: string | null;
   visitedLocations: string[];
   cluesCollected: Clue[];
   daysRemaining: number;
@@ -45,6 +46,7 @@ const ZaldyCoGame = () => {
 
   const [gameState, setGameState] = useState<GameState>({
     currentLocation: "philippines",
+    previousLocation: null,
     visitedLocations: ["philippines"],
     cluesCollected: [],
     daysRemaining: 7,
@@ -157,6 +159,7 @@ const ZaldyCoGame = () => {
     setGameState({
       ...gameState,
       currentLocation: locationKey,
+      previousLocation: gameState.currentLocation,
       visitedLocations: [...gameState.visitedLocations, locationKey],
       daysRemaining: newDays,
       showTravel: false,
@@ -198,10 +201,10 @@ const ZaldyCoGame = () => {
       <div className="min-h-screen bg-black flex items-center justify-center p-4 crt-effect scanline">
         <div className="max-w-4xl w-full bg-black border-8 border-green-500 terminal-border p-8 shadow-2xl">
           <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold mb-2 text-green-400 font-orbitron terminal-glow">
+            <h1 className="text-4xl font-bold mb-2 text-green-400 font-orbitron ">
               WHERE IN THE WORLD IS
             </h1>
-            <h2 className="text-5xl font-black mb-4 text-green-500 font-orbitron terminal-glow animate-pulse">
+            <h2 className="text-5xl font-black mb-4 text-green-500 font-orbitron ">
               ZALDY CO?
             </h2>
             <div className="bg-green-950 border-4 border-green-600 p-3 mb-4">
@@ -306,7 +309,7 @@ const ZaldyCoGame = () => {
         <div className="bg-green-950 border-b-4 border-green-600 p-3">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-green-400 terminal-glow font-orbitron">WHERE IS ZALDY CO?</h1>
+              <h1 className="text-3xl font-bold text-green-400 font-orbitron">WHERE IS ZALDY CO?</h1>
               <p className="text-lg text-gray-400">Independent Commission for Infrastructure</p>
             </div>
             <div className="text-right bg-green-900 border-2 border-green-600 px-4 py-1">
@@ -423,16 +426,31 @@ const ZaldyCoGame = () => {
                   <div className="bg-green-950 border-4 border-green-600 p-3">
                     <h4 className="font-bold mb-2 text-green-400 text-lg font-orbitron">TRAVEL (COST: 1 DAY)</h4>
                     <div className="space-y-2">
-                      {currentLocation.connections.map(locKey => (
-                        <button
-                          key={locKey}
-                          onClick={() => travelTo(locKey)}
-                          className="w-full text-left bg-black hover:bg-green-900 border-2 border-green-600 p-2 text-base transition-all hover:scale-105"
-                        >
-                          <p className="font-bold text-white">&gt; {locations[locKey].name}</p>
-                          <p className="text-gray-300 text-sm">{locations[locKey].description}</p>
-                        </button>
-                      ))}
+                      {currentLocation.connections
+                        .filter(locKey => locKey !== gameState.previousLocation) // Don't allow going back to previous location
+                        .map(locKey => {
+                          // Check if this location is on the suspect's trail
+                          const isOnTrail = suspect.trail.includes(locKey);
+                          const trailIndex = suspect.trail.indexOf(gameState.currentLocation);
+                          const isNextInTrail = isOnTrail && trailIndex !== -1 && suspect.trail[trailIndex + 1] === locKey;
+                          
+                          return (
+                            <button
+                              key={locKey}
+                              onClick={() => travelTo(locKey)}
+                              className={`w-full text-left bg-black hover:bg-green-900 border-2 p-2 text-base transition-all hover:scale-105 ${
+                                isNextInTrail ? 'border-green-400 bg-green-950' : 'border-green-600'
+                              }`}
+                            >
+                              <p className="font-bold text-white">
+                                &gt; {locations[locKey].name}
+                                {isNextInTrail && <span className="ml-2 text-green-400 text-xs">● HOT TRAIL</span>}
+                                {isOnTrail && !isNextInTrail && <span className="ml-2 text-yellow-400 text-xs">○ ON TRAIL</span>}
+                              </p>
+                              <p className="text-gray-300 text-sm">{locations[locKey].description}</p>
+                            </button>
+                          );
+                        })}
                       <button
                         onClick={() => setGameState({...gameState, showTravel: false})}
                         className="w-full bg-green-900 hover:bg-green-800 text-white py-1 px-2 border-2 border-green-600 text-base"
@@ -446,14 +464,14 @@ const ZaldyCoGame = () => {
                     <div className="space-y-2">
                       <button
                         onClick={() => setGameState({...gameState, showTravel: true})}
-                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 terminal-glow font-orbitron"
+                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 font-orbitron"
                       >
                         &gt; TRAVEL TO ANOTHER CITY
                       </button>
                       
                       <button
                         onClick={attemptArrest}
-                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 terminal-glow font-orbitron"
+                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 font-orbitron"
                       >
                         &gt; ISSUE ARREST WARRANT
                       </button>
