@@ -15,6 +15,7 @@ const getAudio = () => {
   if (!globalAudio) {
     globalAudio = new Audio('/typewriter-sound.mp3');
     globalAudio.volume = 0.3;
+    globalAudio.playbackRate = 1.8;
     globalAudio.preload = 'auto';
     globalAudio.loop = true; // Loop for continuous typing sound
   }

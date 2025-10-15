@@ -60,33 +60,33 @@ export const generateDirectionClue = (
   isOnTrail: boolean
 ): string => {
   if (isOnTrail) {
-    // On the right trail - clear hints to next location
+    // On the right trail - VERY CLEAR directions to next location
     const accurateClues = [
-      `I overheard him mention ${locationName} to his associate. They seemed to be discussing travel arrangements.`,
-      `His assistant was making calls about ${locationName}. Sounded like that's where they're heading next.`,
-      `He left a hotel brochure on the table - ${locationName}. Might have been accidental, or maybe he doesn't think anyone's watching.`,
-      `I heard him ask about flights to ${locationName}. Left here about a day ago, I believe.`,
-      `Saw luggage tags marked for ${locationName}. He departed in a hurry yesterday.`,
-      `His driver mentioned they were heading to ${locationName}. Seemed to be the next stop on his itinerary.`,
-      `Overheard a phone conversation - something about meeting contacts in ${locationName}. Left earlier today.`,
-      `He was researching ${locationName} on his phone. Looked like he was planning his next move there.`,
-      `His security detail was discussing logistics for ${locationName}. That's definitely where he went.`,
-      `I delivered something to his hotel room - saw ${locationName} travel documents on his desk.`
+      `He's headed to ${locationName}. I heard his assistant booking flights there yesterday.`,
+      `${locationName} - that's where he's going. His driver told me they left this morning.`,
+      `He mentioned ${locationName} multiple times. That's definitely his next destination.`,
+      `I saw his travel itinerary. Next stop: ${locationName}. He should be there by now.`,
+      `His security team was discussing ${locationName}. They departed about a day ago.`,
+      `${locationName}. I'm certain that's where he went. Saw the luggage tags myself.`,
+      `He flew to ${locationName}. The jet was fueled and ready yesterday afternoon.`,
+      `I overheard him say "${locationName}" on the phone. Sounded urgent, like he needed to get there fast.`,
+      `His hotel reservation was for ${locationName}. Left here heading straight there.`,
+      `${locationName} - no question about it. That's his next stop on the way to hiding.`
     ];
     return accurateClues[Math.floor(Math.random() * accurateClues.length)];
   } else {
-    // Off the trail - vague or misleading information
+    // Off the trail - still somewhat helpful but less certain
     const vagueClues = [
-      "I heard someone mention his name recently, but I'm not certain where he went. Could be anywhere in the region.",
-      "People say he was here, but that was several days ago. The trail's probably gone cold by now.",
-      "There are rumors about him going somewhere with strict banking privacy. Or was it casinos? Hard to separate fact from fiction.",
-      "Someone claimed to see him, but these high-profile people often have security doubles. Can't be sure it was really him.",
-      "I've heard talk, but nothing concrete. With his resources, he could be anywhere by now.",
-      "No reliable information, I'm afraid. People with money can disappear easily - private transportation, false trails.",
-      "There's been gossip, but nothing I'd stake my reputation on. Too many conflicting reports.",
-      "I might have seen someone matching that description, but it was brief. Could have been him, could have been anyone.",
-      "The word on the street is unreliable. Everyone has a theory, but no one has facts.",
-      "I heard he might be in the area, but that was days ago. If he was ever here, he's long gone now."
+      "I heard rumors he might be in the area, but I can't confirm. Could be days old information.",
+      "Someone matching that description passed through, but that was a while ago. Not sure where he went from here.",
+      "There's talk he was here, but the trail seems cold. Rich people leave false leads.",
+      "I might have heard his name mentioned, but nothing concrete. He could be anywhere by now.",
+      "People say they saw someone like that, but high-profile fugitives often use doubles.",
+      "The information here is unreliable. Too many conflicting stories about where he went.",
+      "I've heard various rumors - banking havens, casino cities - but nothing I'd bet on.",
+      "If he was here, it was days ago. The trail has gone cold.",
+      "Sorry, no solid leads. People with that much money know how to disappear.",
+      "I can't give you a reliable direction. The information is too scattered."
     ];
     return vagueClues[Math.floor(Math.random() * vagueClues.length)];
   }
@@ -103,10 +103,10 @@ export const generateClue = (
 ): ClueResponse => {
   const intro = `You approach ${witness.name}, a ${witness.type} at ${witness.location}.`;
   
-  // If on the trail, give better clues more often
+  // Balanced clues: 50% direction, 50% character info when on trail
   const clueTypes = isOnTrail 
-    ? ['appearance', 'hobby', 'vehicle', 'trait', 'direction', 'direction'] // More direction clues when on trail
-    : ['appearance', 'hobby', 'vehicle', 'trait', 'direction', 'nothing'];   // Possible dead end
+    ? ['direction', 'direction', 'direction', 'direction', 'appearance', 'hobby', 'vehicle', 'trait'] // 4/8 = 50% direction, 50% character
+    : ['appearance', 'hobby', 'vehicle', 'trait', 'direction', 'nothing'];   // 1/6 direction when off trail
   
   const clueType = clueTypes[Math.floor(Math.random() * clueTypes.length)] as 'appearance' | 'hobby' | 'vehicle' | 'trait' | 'direction' | 'nothing';
   
@@ -141,7 +141,7 @@ export const generateClue = (
       }
       break;
     case 'nothing':
-      clueText = "Sorry, I haven't seen anyone like that. Maybe try asking someone else?";
+      clueText = "I haven't seen anyone matching that exact description. He might have been here, but if so, he's already moved on. Try checking the connections from here - he could be at any of the nearby cities.";
       break;
     default:
       clueText = "I'm not sure I can help you with that.";
