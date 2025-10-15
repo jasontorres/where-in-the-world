@@ -308,36 +308,36 @@ const ZaldyCoGame = () => {
   if (!gameState.gameStarted) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4 crt-effect scanline">
-        <div className="max-w-4xl w-full bg-gray-900 border-8 border-gray-700 p-8 shadow-2xl">
+        <div className="max-w-4xl w-full bg-black border-8 border-green-500 terminal-border p-8 shadow-2xl">
           <div className="text-center mb-6">
-            <h1 className="text-4xl font-bold mb-2 text-yellow-300 font-orbitron text-shadow-glow">
+            <h1 className="text-4xl font-bold mb-2 text-green-400 font-orbitron terminal-glow">
               WHERE IN THE WORLD IS
             </h1>
-            <h2 className="text-5xl font-black mb-4 text-red-400 font-orbitron text-shadow-glow animate-pulse">
+            <h2 className="text-5xl font-black mb-4 text-green-500 font-orbitron terminal-glow animate-pulse">
               ZALDY CO?
             </h2>
-            <div className="bg-blue-900 border-4 border-blue-600 p-3 mb-4">
-              <p className="text-yellow-300 font-bold font-vt323 text-2xl">
+            <div className="bg-green-950 border-4 border-green-600 p-3 mb-4">
+              <p className="text-white font-bold text-2xl">
                 A POLITICAL SATIRE INVESTIGATION
               </p>
             </div>
           </div>
           
-          <div className="bg-red-950 border-4 border-red-700 p-4 mb-4 font-vt323 text-xl">
-            <h3 className="font-bold text-2xl mb-3 text-yellow-300">CASE FILE: OPERATION BAHA FLOOD</h3>
-            <div className="text-gray-300 space-y-1">
-              <p><span className="text-yellow-400">SUSPECT:</span> Congressman Zaldy Co</p>
-              <p><span className="text-yellow-400">POSITION:</span> Former Chair, House Appropriations Committee</p>
-              <p><span className="text-yellow-400">CHARGES:</span> Plunder, Rigged Infrastructure Deals, Ghost Projects</p>
-              <p><span className="text-yellow-400">EMBEZZLED:</span> Over P100,000,000,000</p>
-              <p><span className="text-yellow-400">ASSETS:</span> $36M Gulfstream jet, $16M Helicopter</p>
-              <p><span className="text-yellow-400">LAST SEEN:</span> Left USA August 26, 2025</p>
+          <div className="bg-green-950 border-4 border-green-600 p-4 mb-4 text-xl">
+            <h3 className="font-bold text-2xl mb-3 text-green-400">CASE FILE: OPERATION BAHA FLOOD</h3>
+            <div className="text-gray-200 space-y-1">
+              <p><span className="text-green-300">SUSPECT:</span> Congressman Zaldy Co</p>
+              <p><span className="text-green-300">POSITION:</span> Former Chair, House Appropriations Committee</p>
+              <p><span className="text-green-300">CHARGES:</span> Plunder, Rigged Infrastructure Deals, Ghost Projects</p>
+              <p><span className="text-green-300">EMBEZZLED:</span> Over P100,000,000,000</p>
+              <p><span className="text-green-300">ASSETS:</span> $36M Gulfstream jet, $16M Helicopter</p>
+              <p><span className="text-green-300">LAST SEEN:</span> Left USA August 26, 2025</p>
             </div>
           </div>
 
-          <div className="bg-gray-800 border-4 border-gray-600 p-4 mb-4 font-vt323 text-xl">
+          <div className="bg-green-950 border-4 border-green-600 p-4 mb-4 text-xl">
             <h3 className="font-bold text-2xl mb-3 text-green-400">HOW TO PLAY</h3>
-            <ul className="space-y-1 text-gray-300">
+            <ul className="space-y-1 text-gray-200">
               <li>- Interview witnesses to gather clues</li>
               <li>- Travel between cities following the trail</li>
               <li>- Collect evidence about Zaldy Co</li>
@@ -348,7 +348,7 @@ const ZaldyCoGame = () => {
 
           <button
             onClick={startGame}
-            className="w-full bg-red-700 hover:bg-red-600 text-yellow-300 font-bold py-3 px-6 border-4 border-red-900 font-vt323 text-2xl transition-all hover:scale-105"
+            className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-6 border-4 border-green-500 text-2xl transition-all hover:scale-105 terminal-glow"
           >
             &gt; START INVESTIGATION
           </button>
@@ -362,26 +362,26 @@ const ZaldyCoGame = () => {
   if (gameState.gameOver) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4 crt-effect scanline">
-        <div className="max-w-3xl w-full bg-gray-900 border-8 border-gray-700 p-8">
-          <div className="text-center font-vt323">
+        <div className="max-w-3xl w-full bg-black border-8 border-green-500 terminal-border p-8">
+          <div className="text-center">
             {gameState.gameWon ? (
               <>
                 <div className="text-6xl mb-4 animate-bounce text-green-400">★</div>
-                <h2 className="text-5xl font-bold text-green-400 mb-4 text-shadow-glow">CASE CLOSED!</h2>
+                <h2 className="text-5xl font-bold text-green-400 mb-4 terminal-glow">CASE CLOSED!</h2>
               </>
             ) : (
               <>
-                <div className="text-6xl mb-4 text-red-400">✖</div>
-                <h2 className="text-5xl font-bold text-red-400 mb-4 text-shadow-glow">CASE COLD</h2>
+                <div className="text-6xl mb-4 text-green-600">✖</div>
+                <h2 className="text-5xl font-bold text-green-600 mb-4 terminal-glow">CASE COLD</h2>
               </>
             )}
             
-            <div className="bg-gray-800 border-4 border-gray-600 p-6 mb-6">
+            <div className="bg-green-950 border-4 border-green-600 p-6 mb-6">
               {gameState.conversation && (
                 <Typewriter 
                   text={gameState.conversation.text} 
-                  speed={20}
-                  className="text-xl text-gray-300 leading-relaxed text-left"
+                  speed={10}
+                  className="text-xl text-gray-200 leading-relaxed text-left"
                   onComplete={() => setGameState({...gameState, typewriterComplete: true})}
                 />
               )}
@@ -389,9 +389,9 @@ const ZaldyCoGame = () => {
 
             {gameState.typewriterComplete && (
               <>
-                <div className="bg-blue-950 border-4 border-blue-700 p-4 mb-6">
-                  <h3 className="font-bold mb-3 text-cyan-400 text-2xl">INVESTIGATION SUMMARY</h3>
-                  <div className="text-gray-300 space-y-1 text-xl">
+                <div className="bg-green-950 border-4 border-green-600 p-4 mb-6">
+                  <h3 className="font-bold mb-3 text-green-400 text-2xl">INVESTIGATION SUMMARY</h3>
+                  <div className="text-gray-200 space-y-1 text-xl">
                     <p>Days Used: {7 - gameState.daysRemaining} of 7</p>
                     <p>Locations Visited: {gameState.visitedLocations.length}</p>
                     <p>Clues Collected: {gameState.cluesCollected.length}</p>
@@ -400,7 +400,7 @@ const ZaldyCoGame = () => {
 
                 <button
                   onClick={() => window.location.reload()}
-                  className="bg-red-700 hover:bg-red-600 text-yellow-300 font-bold py-3 px-8 border-4 border-red-900 text-2xl transition-all hover:scale-105"
+                  className="bg-green-700 hover:bg-green-600 text-white font-bold py-3 px-8 border-4 border-green-500 text-2xl transition-all hover:scale-105 terminal-glow"
                 >
                   &gt; NEW CASE
                 </button>
@@ -414,93 +414,94 @@ const ZaldyCoGame = () => {
 
   return (
     <div className="min-h-screen bg-black p-2 crt-effect">
-      <div className="max-w-7xl mx-auto bg-gray-900 border-8 border-gray-700 shadow-2xl scanline">
-        <div className="bg-gray-800 border-b-4 border-gray-600 p-3 font-vt323">
+      <div className="max-w-7xl mx-auto bg-black border-8 border-green-500 terminal-border shadow-2xl scanline">
+        <div className="bg-green-950 border-b-4 border-green-600 p-3">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-yellow-300 text-shadow-glow">WHERE IS ZALDY CO?</h1>
+              <h1 className="text-3xl font-bold text-green-400 terminal-glow">WHERE IS ZALDY CO?</h1>
               <p className="text-lg text-gray-400">Independent Commission for Infrastructure</p>
             </div>
-            <div className="text-right bg-red-900 border-2 border-red-700 px-4 py-1">
-              <p className="text-lg text-yellow-400">DAYS LEFT</p>
-              <p className="text-5xl font-bold text-yellow-300 animate-pulse">{gameState.daysRemaining}</p>
+            <div className="text-right bg-green-900 border-2 border-green-600 px-4 py-1">
+              <p className="text-lg text-green-400">DAYS LEFT</p>
+              <p className="text-5xl font-bold text-green-300 animate-pulse">{gameState.daysRemaining}</p>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 min-h-[600px]">
-          <div className="bg-black border-r-4 border-gray-700 p-4">
+          <div className="bg-black border-r-4 border-green-700 p-4">
             <div className="mb-4">
-              <div className="bg-gray-800 border-2 border-gray-600 p-2 mb-2">
-                <h2 className="text-2xl font-bold text-yellow-300 font-vt323">
+              <div className="bg-green-950 border-2 border-green-600 p-2 mb-2">
+                <h2 className="text-2xl font-bold text-white">
                   {currentLocation.name}
                 </h2>
               </div>
               
-              <div className="border-4 border-gray-600 mb-3">
+              <div className="border-4 border-green-600 mb-3">
                 <img 
                   src={currentLocation.image} 
                   alt={currentLocation.name}
-                  className="w-full h-64 object-cover pixel-border"
+                  className="w-full h-64 object-cover pixel-border opacity-60 mix-blend-screen"
+                  style={{filter: 'sepia(100%) hue-rotate(60deg) saturate(300%)'}}
                 />
               </div>
 
-              <div className="bg-gray-800 border-2 border-gray-600 p-3">
-                <p className="text-lg text-gray-300 font-vt323">
+              <div className="bg-green-950 border-2 border-green-600 p-3">
+                <p className="text-lg text-gray-200">
                   {currentLocation.description}
                 </p>
               </div>
             </div>
 
-            <div className="bg-yellow-900 border-4 border-yellow-700 p-3 font-vt323">
-              <h3 className="font-bold text-xl mb-2 text-yellow-200">EVIDENCE DOSSIER</h3>
+            <div className="bg-green-950 border-4 border-green-600 p-3">
+              <h3 className="font-bold text-xl mb-2 text-green-400">EVIDENCE DOSSIER</h3>
               
-              <div className="space-y-2 text-base bg-black border-2 border-yellow-800 p-2">
+              <div className="space-y-2 text-base bg-black border-2 border-green-700 p-2">
                 <div>
-                  <p className="font-bold text-yellow-300">APPEARANCE:</p>
-                  <p className="text-gray-400 pl-2">
+                  <p className="font-bold text-green-300">APPEARANCE:</p>
+                  <p className="text-gray-200 pl-2">
                     {gameState.evidence.appearance || "[UNKNOWN]"}
                   </p>
                 </div>
                 
                 <div>
-                  <p className="font-bold text-yellow-300">HOBBY:</p>
-                  <p className="text-gray-400 pl-2">
+                  <p className="font-bold text-green-300">HOBBY:</p>
+                  <p className="text-gray-200 pl-2">
                     {gameState.evidence.hobby || "[UNKNOWN]"}
                   </p>
                 </div>
                 
                 <div>
-                  <p className="font-bold text-yellow-300">VEHICLE:</p>
-                  <p className="text-gray-400 pl-2">
+                  <p className="font-bold text-green-300">VEHICLE:</p>
+                  <p className="text-gray-200 pl-2">
                     {gameState.evidence.vehicle || "[UNKNOWN]"}
                   </p>
                 </div>
                 
                 <div>
-                  <p className="font-bold text-yellow-300">TRAIT:</p>
-                  <p className="text-gray-400 pl-2">
+                  <p className="font-bold text-green-300">TRAIT:</p>
+                  <p className="text-gray-200 pl-2">
                     {gameState.evidence.trait || "[UNKNOWN]"}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-2 text-base text-yellow-200">
+              <div className="mt-2 text-base text-gray-300">
                 CLUES COLLECTED: {gameState.cluesCollected.length}
               </div>
             </div>
           </div>
 
-          <div className="bg-black p-4 flex flex-col font-vt323">
+          <div className="bg-black p-4 flex flex-col">
             {gameState.conversation && (
-              <div className="bg-gray-800 border-4 border-gray-600 p-3 mb-4 flex-shrink-0">
+              <div className="bg-green-950 border-4 border-green-600 p-3 mb-4 flex-shrink-0">
                 <p className="font-bold text-green-400 mb-2 text-lg">
                   &gt; {gameState.conversation.speaker}
                 </p>
                 <Typewriter 
                   text={gameState.conversation.text}
-                  speed={20}
-                  className="text-lg text-gray-300 whitespace-pre-line leading-relaxed"
+                  speed={10}
+                  className="text-lg text-gray-200 whitespace-pre-line leading-relaxed"
                   onComplete={() => setGameState({...gameState, typewriterComplete: true})}
                 />
               </div>
@@ -509,22 +510,22 @@ const ZaldyCoGame = () => {
             {gameState.typewriterComplete && (
               <div className="space-y-3 flex-1">
                 {gameState.showTravel ? (
-                  <div className="bg-blue-950 border-4 border-blue-700 p-3">
-                    <h4 className="font-bold mb-2 text-cyan-300 text-lg">TRAVEL (COST: 1 DAY)</h4>
+                  <div className="bg-green-950 border-4 border-green-600 p-3">
+                    <h4 className="font-bold mb-2 text-green-400 text-lg">TRAVEL (COST: 1 DAY)</h4>
                     <div className="space-y-2">
                       {currentLocation.connections.map(locKey => (
                         <button
                           key={locKey}
                           onClick={() => travelTo(locKey)}
-                          className="w-full text-left bg-black hover:bg-gray-900 border-2 border-cyan-600 p-2 text-base transition-all hover:scale-105"
+                          className="w-full text-left bg-black hover:bg-green-900 border-2 border-green-600 p-2 text-base transition-all hover:scale-105"
                         >
-                          <p className="font-bold text-cyan-300">&gt; {locations[locKey].name}</p>
-                          <p className="text-gray-400 text-sm">{locations[locKey].description}</p>
+                          <p className="font-bold text-white">&gt; {locations[locKey].name}</p>
+                          <p className="text-gray-300 text-sm">{locations[locKey].description}</p>
                         </button>
                       ))}
                       <button
                         onClick={() => setGameState({...gameState, showTravel: false})}
-                        className="w-full bg-gray-700 hover:bg-gray-600 text-gray-300 py-1 px-2 border-2 border-gray-500 text-base"
+                        className="w-full bg-green-900 hover:bg-green-800 text-white py-1 px-2 border-2 border-green-600 text-base"
                       >
                         &lt; CANCEL
                       </button>
@@ -535,30 +536,30 @@ const ZaldyCoGame = () => {
                     <div className="space-y-2">
                       <button
                         onClick={() => setGameState({...gameState, showTravel: true})}
-                        className="w-full bg-blue-700 hover:bg-blue-600 text-yellow-300 font-bold py-2 px-4 border-4 border-blue-900 text-lg transition-all hover:scale-105"
+                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 terminal-glow"
                       >
                         &gt; TRAVEL TO ANOTHER CITY
                       </button>
                       
                       <button
                         onClick={attemptArrest}
-                        className="w-full bg-green-700 hover:bg-green-600 text-yellow-300 font-bold py-2 px-4 border-4 border-green-900 text-lg transition-all hover:scale-105"
+                        className="w-full bg-green-700 hover:bg-green-600 text-white font-bold py-2 px-4 border-4 border-green-500 text-lg transition-all hover:scale-105 terminal-glow"
                       >
                         &gt; ISSUE ARREST WARRANT
                       </button>
                     </div>
 
-                    <div className="bg-purple-950 border-4 border-purple-700 p-3 mt-3">
-                      <h3 className="font-bold text-lg mb-2 text-purple-300">INTERVIEW WITNESSES</h3>
+                    <div className="bg-green-950 border-4 border-green-600 p-3 mt-3">
+                      <h3 className="font-bold text-lg mb-2 text-green-400">INTERVIEW WITNESSES</h3>
                       <div className="space-y-2">
                         {currentLocation.witnesses.map((witness, idx) => (
                           <button
                             key={idx}
                             onClick={() => interviewWitness(witness)}
-                            className="w-full text-left bg-black hover:bg-gray-900 border-2 border-purple-500 p-2 transition-all hover:scale-105"
+                            className="w-full text-left bg-black hover:bg-green-900 border-2 border-green-600 p-2 transition-all hover:scale-105"
                           >
-                            <p className="font-bold text-purple-200 text-base">&gt; {witness.name}</p>
-                            <p className="text-sm text-gray-400">{witness.type} - {witness.location}</p>
+                            <p className="font-bold text-white text-base">&gt; {witness.name}</p>
+                            <p className="text-sm text-gray-300">{witness.type} - {witness.location}</p>
                           </button>
                         ))}
                       </div>

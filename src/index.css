@@ -1,21 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  font-family: 'VT323', monospace;
+  font-family: 'Orbitron', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --terminal-green: #00ff00;
+  --terminal-green-dark: #00cc00;
+  --terminal-green-darker: #009900;
+  --terminal-green-dim: #006600;
+  --terminal-bg: #000000;
+  --terminal-text: #e0e0e0;
+  --terminal-text-bright: #ffffff;
 }
 
 body {
   margin: 0;
   padding: 0;
-  background-color: #000;
-  color: #fff;
+  background-color: var(--terminal-bg);
+  color: var(--terminal-text-bright);
 }
 
 @layer utilities {
   .text-shadow-glow {
     text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+  }
+  
+  .terminal-glow {
+    text-shadow: 
+      0 0 5px var(--terminal-green),
+      0 0 10px var(--terminal-green),
+      0 0 20px var(--terminal-green),
+      0 0 40px var(--terminal-green-dark);
+  }
+  
+  .terminal-border {
+    border-color: var(--terminal-green);
+    box-shadow: 
+      0 0 5px var(--terminal-green-dim),
+      inset 0 0 5px var(--terminal-green-dim);
   }
   
   .scanline {

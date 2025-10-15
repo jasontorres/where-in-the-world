@@ -7,7 +7,7 @@ interface TypewriterProps {
   className?: string;
 }
 
-const Typewriter = ({ text, speed = 30, onComplete, className = "" }: TypewriterProps) => {
+const Typewriter = ({ text, speed = 10, onComplete, className = "" }: TypewriterProps) => {
   const [displayedText, setDisplayedText] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
