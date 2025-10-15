@@ -1,7 +1,15 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: 'Lexend', sans-serif;
+  --font-orbitron: 'Orbitron', sans-serif;
+  --font-lexend: 'Lexend', sans-serif;
+  --font-vt323: 'VT323', monospace;
+  --font-retro: 'Press Start 2P', cursive;
+}
+
 :root {
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Lexend', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   --terminal-green: #00ff00;

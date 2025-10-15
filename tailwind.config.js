@@ -7,10 +7,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['"Orbitron"', 'sans-serif'],
+        'sans': ['"Lexend"', 'sans-serif'],
         'retro': ['"Press Start 2P"', 'cursive'],
         'vt323': ['"VT323"', 'monospace'],
         'orbitron': ['"Orbitron"', 'sans-serif'],
+        'lexend': ['"Lexend"', 'sans-serif'],
       },
     },
   },
