@@ -53,7 +53,27 @@ body {
     overflow: hidden;
   }
   
+  /* Horizontal scanlines */
   .scanline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 1px,
+      rgba(0, 0, 0, 0.3) 1px,
+      rgba(0, 0, 0, 0.3) 2px
+    );
+    pointer-events: none;
+    z-index: 10;
+  }
+  
+  /* Moving scan line effect */
+  .scanline::after {
     content: "";
     position: absolute;
     top: 0;
@@ -62,25 +82,46 @@ body {
     height: 100%;
     background: linear-gradient(
       to bottom,
-      transparent 50%,
-      rgba(0, 0, 0, 0.1) 50%
+      transparent 0%,
+      rgba(0, 255, 0, 0.05) 50%,
+      transparent 100%
     );
-    background-size: 100% 4px;
+    background-size: 100% 200%;
     pointer-events: none;
-    animation: scanline 8s linear infinite;
+    animation: scanline-move 8s linear infinite;
+    z-index: 9;
   }
   
-  @keyframes scanline {
+  @keyframes scanline-move {
     0% {
-      transform: translateY(0);
+      background-position: 0% 0%;
     }
     100% {
-      transform: translateY(4px);
+      background-position: 0% 100%;
     }
   }
   
   .crt-effect {
     animation: flicker 0.15s infinite;
+    position: relative;
+  }
+  
+  /* CRT screen curvature and vignette */
+  .crt-effect::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 0%,
+      transparent 60%,
+      rgba(0, 0, 0, 0.3) 100%
+    );
+    pointer-events: none;
+    z-index: 5;
   }
   
   @keyframes flicker {
@@ -93,6 +134,13 @@ body {
     100% {
       opacity: 0.97;
     }
+  }
+  
+  /* Screen glow effect */
+  .screen-glow {
+    box-shadow: 
+      inset 0 0 100px rgba(0, 255, 0, 0.05),
+      0 0 50px rgba(0, 255, 0, 0.1);
   }
   
   .pixel-border {

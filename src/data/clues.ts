@@ -4,6 +4,8 @@ import { Suspect } from './suspects';
 export interface ClueResponse {
   intro: string;
   clue: string;
+  type: 'appearance' | 'hobby' | 'vehicle' | 'trait' | 'direction' | 'nothing';
+  evidenceValue?: string;
 }
 
 // Appearance clues about the suspect
@@ -85,22 +87,27 @@ export const generateClue = (
     ? ['appearance', 'hobby', 'vehicle', 'trait', 'direction', 'direction'] // More direction clues when on trail
     : ['appearance', 'hobby', 'vehicle', 'trait', 'direction', 'nothing'];   // Possible dead end
   
-  const clueType = clueTypes[Math.floor(Math.random() * clueTypes.length)];
+  const clueType = clueTypes[Math.floor(Math.random() * clueTypes.length)] as 'appearance' | 'hobby' | 'vehicle' | 'trait' | 'direction' | 'nothing';
   
   let clueText = '';
+  let evidenceValue: string | undefined;
   
   switch (clueType) {
     case 'appearance':
       clueText = appearanceClues[Math.floor(Math.random() * appearanceClues.length)];
+      evidenceValue = clueText;
       break;
     case 'hobby':
       clueText = hobbyClues[Math.floor(Math.random() * hobbyClues.length)];
+      evidenceValue = clueText;
       break;
     case 'vehicle':
       clueText = vehicleClues[Math.floor(Math.random() * vehicleClues.length)];
+      evidenceValue = clueText;
       break;
     case 'trait':
       clueText = traitClues[Math.floor(Math.random() * traitClues.length)];
+      evidenceValue = clueText;
       break;
     case 'direction':
       if (nextLocation && nextLocationName) {
@@ -121,6 +128,8 @@ export const generateClue = (
   
   return {
     intro,
-    clue: `${witness.name}: "${clueText}"`
+    clue: `${witness.name}: "${clueText}"`,
+    type: clueType,
+    evidenceValue
   };
 };

@@ -111,6 +111,12 @@ const ZaldyCoGame = () => {
     const witnessId = witness.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 70;
     const avatarUrl = `https://i.pravatar.cc/100?img=${witnessId}`;
 
+    // Update evidence if this is a character clue (not direction)
+    const updatedEvidence = clueResponse.evidenceValue ? {
+      ...gameState.evidence,
+      [clueResponse.type]: clueResponse.evidenceValue
+    } : gameState.evidence;
+
     setGameState({
       ...gameState,
       selectedWitness: witness,
@@ -124,8 +130,9 @@ const ZaldyCoGame = () => {
         source: witness.name,
         location: locations[currentLoc].name,
         clue: clueResponse.clue,
-        type: 'mixed'
-      }]
+        type: clueResponse.type
+      }],
+      evidence: updatedEvidence
     });
   };
 
