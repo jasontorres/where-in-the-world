@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import Typewriter from './Typewriter';
 import { locations, type Witness } from '../data/locations';
 import { createSuspect } from '../data/suspects';
+import { generateClue as generateClueFromBank } from '../data/clues';
 
 interface Conversation {
   speaker: string;
@@ -62,6 +63,10 @@ const ZaldyCoGame = () => {
   });
 
   const startGame = () => {
+    // Debug: Log the trail for testing (remove in production)
+    console.log('🔍 SUSPECT TRAIL (DEV MODE):', suspect.trail.map(loc => locations[loc].name));
+    console.log('📍 Final Location:', locations[suspect.currentLocation].name);
+    
     setGameState({
       ...gameState,
       gameStarted: true,
@@ -73,53 +78,33 @@ const ZaldyCoGame = () => {
     });
   };
 
-  const generateClue = (witness: Witness, clueType: string): string => {
-    const currentLoc = gameState.currentLocation;
-    const isRightTrail = locations[currentLoc].connections.includes(suspect.currentLocation);
-    
-    const clueBank: { [key: string]: string[] } = {
-      appearance: [
-        "I saw a portly Filipino man in a barong tagalog. Round face, looked like someone used to power and privilege.",
-        "Mataba, may balbas, parang politiko. The type who smiles for cameras while people drown in floods.",
-        "Big guy in formal Filipino attire. Had that look - you know, the I'm untouchable kind of face."
-      ],
-      hobby: [
-        "Overheard him talking about his Gulfstream jet. THIRTY-SIX MILLION DOLLARS. Para sa anong medical treatment?!",
-        "He was bragging about his helicopter collection. Millions of dollars each. Meanwhile, Manila floods every year.",
-        "Obsessed with luxury aircraft. Has a whole fleet - jets, helicopters. All bought with flood control budget, daw."
-      ],
-      vehicle: [
-        "Arrived in a private Gulfstream 350. The same jet featured in the news - P2 billion of taxpayer money!",
-        "Nakita ko yung private jet niya sa tarmac. Gulfstream 350. While flood victims have nothing, he has THIS.",
-        "Travels by private luxury jet. The audacity - people are drowning and hes flying in P2B worth of aircraft."
-      ],
-      trait: [
-        "He keeps saying he lives modestly - pero may $50 million in jets and helicopters?! Sinungaling!",
-        "Claims the allegations are politically motivated. Classic deflection. His assets speak louder than his denials.",
-        "Denies everything. Says his family lives simply. Pero bakit may Gulfstream at AgustaWestland helicopter?!"
-      ],
-      direction: isRightTrail ? [
-        `I heard him mention something about ${locations[suspect.currentLocation].name}. He's running scared.`,
-        `Overheard his people talking. Next stop: ${locations[suspect.currentLocation].name}. He's trying to hide.`,
-        `His fixer mentioned ${locations[suspect.currentLocation].name}. That's where the money trail leads.`
-      ] : [
-        `People say he went to ${locations[currentLoc].connections[0]}, but it's probably misinformation...`,
-        `Rumors point to ${locations[currentLoc].connections[1]}, pero baka fake news lang yan.`,
-        `Someone said ${locations[currentLoc].connections[0]}, but who knows if it's true?`
-      ]
-    };
-
-    return clueBank[clueType][Math.floor(Math.random() * clueBank[clueType].length)];
-  };
-
   const interviewWitness = (witness: Witness) => {
     if (gameState.daysRemaining <= 0) return;
 
-    const clueTypes = ['appearance', 'hobby', 'vehicle', 'trait', 'direction'];
-    const clueType = clueTypes[Math.floor(Math.random() * clueTypes.length)];
-    const clueText = generateClue(witness, clueType);
-
-    const intro = `You approach ${witness.name}, a ${witness.type} at ${witness.location}.`;
+    const currentLoc = gameState.currentLocation;
+    
+    // Check if current location is on the suspect's trail
+    const trailIndex = suspect.trail.indexOf(currentLoc);
+    const isOnTrail = trailIndex !== -1;
+    
+    // Determine next location in trail (if any)
+    let nextLocation: string | null = null;
+    let nextLocationName: string | null = null;
+    
+    if (isOnTrail && trailIndex < suspect.trail.length - 1) {
+      nextLocation = suspect.trail[trailIndex + 1];
+      nextLocationName = locations[nextLocation].name;
+    }
+    
+    // Generate clue using the new system
+    const clueResponse = generateClueFromBank(
+      witness,
+      suspect,
+      currentLoc,
+      isOnTrail,
+      nextLocation,
+      nextLocationName
+    );
 
     setGameState({
       ...gameState,
@@ -127,18 +112,14 @@ const ZaldyCoGame = () => {
       typewriterComplete: false,
       conversation: {
         speaker: witness.name,
-        text: `${intro}\n\n${witness.name}: ${clueText}`
+        text: `${clueResponse.intro}\n\n${clueResponse.clue}`
       },
       cluesCollected: [...gameState.cluesCollected, {
         source: witness.name,
-        location: locations[gameState.currentLocation].name,
-        clue: clueText,
-        type: clueType
-      }],
-      evidence: clueType !== 'direction' ? {
-        ...gameState.evidence,
-        [clueType]: clueText
-      } : gameState.evidence
+        location: locations[currentLoc].name,
+        clue: clueResponse.clue,
+        type: 'mixed'
+      }]
     });
   };
 
