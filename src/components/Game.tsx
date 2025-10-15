@@ -7,6 +7,7 @@ import { generateClue as generateClueFromBank } from '../data/clues';
 interface Conversation {
   speaker: string;
   text: string;
+  avatarUrl?: string;
 }
 
 interface Clue {
@@ -106,13 +107,18 @@ const ZaldyCoGame = () => {
       nextLocationName
     );
 
+    // Generate consistent avatar for witness based on name
+    const witnessId = witness.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 70;
+    const avatarUrl = `https://i.pravatar.cc/100?img=${witnessId}`;
+
     setGameState({
       ...gameState,
       selectedWitness: witness,
       typewriterComplete: false,
       conversation: {
         speaker: witness.name,
-        text: `${clueResponse.intro}\n\n${clueResponse.clue}`
+        text: `${clueResponse.intro}\n\n${clueResponse.clue}`,
+        avatarUrl: avatarUrl
       },
       cluesCollected: [...gameState.cluesCollected, {
         source: witness.name,
@@ -370,9 +376,31 @@ const ZaldyCoGame = () => {
           <div className="bg-black p-4 flex flex-col">
             {gameState.conversation && (
               <div className="bg-green-950 border-4 border-green-600 p-3 mb-4 flex-shrink-0">
-                <p className="font-bold text-green-400 mb-2 text-lg font-orbitron">
-                  &gt; {gameState.conversation.speaker}
-                </p>
+                <div className="flex items-start gap-3 mb-3">
+                  {gameState.conversation.avatarUrl && (
+                    <div className="relative w-16 h-16 flex-shrink-0">
+                      <img 
+                        src={gameState.conversation.avatarUrl} 
+                        alt={gameState.conversation.speaker}
+                        className="w-16 h-16 rounded-full border-2 border-green-400 grayscale"
+                        style={{ filter: 'grayscale(100%) brightness(0.8) contrast(1.2)' }}
+                      />
+                      <div 
+                        className="absolute inset-0 rounded-full bg-green-500 mix-blend-color opacity-60 pointer-events-none"
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <p className="font-bold text-green-400 text-lg font-orbitron">
+                      &gt; {gameState.conversation.speaker}
+                    </p>
+                    {gameState.selectedWitness && (
+                      <p className="text-green-300 text-sm">
+                        {gameState.selectedWitness.type} • {gameState.selectedWitness.location}
+                      </p>
+                    )}
+                  </div>
+                </div>
                 <Typewriter 
                   text={gameState.conversation.text}
                   speed={10}

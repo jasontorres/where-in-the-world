@@ -1,7 +1,7 @@
-import ZaldyCoGame from './components/ZaldyCoGame'
+import Game from './components/Game'
 
 function App() {
-  return <ZaldyCoGame />
+  return <Game />
 }
 
 export default App
