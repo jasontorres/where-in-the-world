@@ -38,6 +38,7 @@ interface GameState {
   conversation: Conversation | null;
   evidence: Evidence;
   typewriterComplete: boolean;
+  showRecycleBin: boolean;
 }
 
 const ZaldyCoGame = () => {
@@ -62,7 +63,8 @@ const ZaldyCoGame = () => {
       vehicle: null,
       trait: null
     },
-    typewriterComplete: false
+    typewriterComplete: false,
+    showRecycleBin: false
   });
 
   const startGame = () => {
@@ -196,9 +198,126 @@ const ZaldyCoGame = () => {
     }
   };
 
+  // Recycle Bin Window Component - Classic Windows 95 Explorer Style
+  const RecycleBinWindow = () => {
+    if (!gameState.showRecycleBin) return null;
+
+    return (
+      <div className="fixed inset-0 flex items-center justify-center z-50" style={{background: 'rgba(0, 0, 0, 0.3)'}}>
+        <div className="win-window w-full max-w-2xl">
+          {/* Title Bar */}
+          <div className="win-title-bar flex items-center justify-between px-2 py-1">
+            <div className="flex items-center gap-2">
+              <img src="/recycle-bin.png" alt="" className="w-4 h-4" />
+              <span className="text-white font-bold">Recycle Bin</span>
+            </div>
+            <div className="flex gap-1">
+              <button className="w-6 h-6 win-button text-xs font-bold">_</button>
+              <button className="w-6 h-6 win-button text-xs font-bold">□</button>
+              <button 
+                onClick={() => setGameState({...gameState, showRecycleBin: false})}
+                className="w-6 h-6 win-button text-xs font-bold hover:brightness-105"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          {/* Menu Bar */}
+          <div className="flex gap-1 px-2 py-1" style={{background: 'var(--win-gray)', borderBottom: '1px solid var(--win-dark-gray)'}}>
+            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">File</button>
+            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">Edit</button>
+            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">View</button>
+            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">Help</button>
+          </div>
+
+          {/* Toolbar */}
+          <div className="flex items-center gap-1 px-2 py-1" style={{background: 'var(--win-gray)', borderBottom: '1px solid var(--win-dark-gray)'}}>
+            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Back</button>
+            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Forward</button>
+            <div className="win-separator w-px h-5 mx-1"></div>
+            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Up</button>
+            <div className="win-separator w-px h-5 mx-1"></div>
+            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Cut</button>
+            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Copy</button>
+            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Paste</button>
+            <div className="win-separator w-px h-5 mx-1"></div>
+            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Delete</button>
+          </div>
+
+          {/* Address Bar */}
+          <div className="flex items-center gap-2 px-2 py-1.5" style={{background: 'var(--win-gray)', borderBottom: '1px solid var(--win-dark-gray)'}}>
+            <span className="text-xs font-bold">Address:</span>
+            <div className="flex-1 win-panel-inset px-2 py-0.5">
+              <span className="text-xs">C:\Recycle Bin</span>
+            </div>
+          </div>
+
+          {/* File List Area */}
+          <div className="p-2" style={{background: 'var(--win-gray)'}}>
+            <div className="win-panel-inset" style={{background: 'white'}}>
+              {/* Column Headers */}
+              <div className="flex items-center border-b" style={{borderColor: 'var(--win-dark-gray)', background: 'var(--win-gray)'}}>
+                <div className="flex-1 px-2 py-1 border-r" style={{borderColor: 'var(--win-white)'}}>
+                  <span className="text-xs font-bold">Name</span>
+                </div>
+                <div className="w-24 px-2 py-1 border-r" style={{borderColor: 'var(--win-white)'}}>
+                  <span className="text-xs font-bold">Size</span>
+                </div>
+                <div className="w-32 px-2 py-1 border-r" style={{borderColor: 'var(--win-white)'}}>
+                  <span className="text-xs font-bold">Type</span>
+                </div>
+                <div className="w-32 px-2 py-1">
+                  <span className="text-xs font-bold">Modified</span>
+                </div>
+              </div>
+
+              {/* File List */}
+              <div className="min-h-[200px]" style={{background: 'white'}}>
+                <div className="flex items-center px-2 py-1 hover:bg-blue-600 hover:text-white cursor-pointer group">
+                  <div className="flex-1 flex items-center gap-2">
+                    <img src="/file-icon.png" alt="File" className="w-4 h-4" />
+                    <span className="text-xs">Romualdez files</span>
+                  </div>
+                  <div className="w-24 px-2">
+                    <span className="text-xs">2.4 MB</span>
+                  </div>
+                  <div className="w-32 px-2">
+                    <span className="text-xs">File Folder</span>
+                  </div>
+                  <div className="w-32 px-2">
+                    <span className="text-xs">10/15/2025</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Status Bar */}
+          <div className="flex items-center justify-between px-2 py-1 border-t-2" style={{background: 'var(--win-gray)', borderColor: 'var(--win-white)'}}>
+            <span className="text-xs">1 object(s)</span>
+            <span className="text-xs">2.4 MB</span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (!gameState.gameStarted) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
+      <div className="min-h-screen relative flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
+        {/* Desktop Icons - Fixed at bottom left */}
+        <div className="fixed bottom-4 left-4 flex gap-2 z-10">
+          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
+            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Recycle Bin</div>
+          </div>
+          <div className="desktop-icon">
+            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Discaya files</div>
+          </div>
+        </div>
+
         <div className="max-w-4xl w-full win-window">
           {/* Title Bar */}
           <div className="win-title-bar flex items-center justify-between px-2 py-1">
@@ -261,6 +380,9 @@ const ZaldyCoGame = () => {
             </div>
           </div>
         </div>
+
+        {/* Recycle Bin Window */}
+        <RecycleBinWindow />
       </div>
     );
   }
@@ -269,7 +391,19 @@ const ZaldyCoGame = () => {
 
   if (gameState.gameOver) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
+      <div className="min-h-screen relative flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
+        {/* Desktop Icons - Fixed at bottom left */}
+        <div className="fixed bottom-4 left-4 flex gap-2 z-10">
+          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
+            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Recycle Bin</div>
+          </div>
+          <div className="desktop-icon">
+            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Discaya files</div>
+          </div>
+        </div>
+
         <div className="max-w-3xl w-full win-window">
           <div className="win-title-bar px-2 py-1">
             <span className="text-white font-bold">{gameState.gameWon ? 'Case Closed!' : 'Case File - Closed'}</span>
@@ -321,12 +455,27 @@ const ZaldyCoGame = () => {
             </div>
           </div>
         </div>
+
+        {/* Recycle Bin Window */}
+        <RecycleBinWindow />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{background: 'var(--win-desktop)'}}>
+    <div className="min-h-screen relative" style={{background: 'var(--win-desktop)'}}>
+      {/* Desktop Icons - Fixed at bottom left */}
+      <div className="fixed bottom-4 left-4 flex gap-2 z-10">
+        <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
+          <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
+          <div className="desktop-icon-label">Recycle Bin</div>
+        </div>
+        <div className="desktop-icon">
+          <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
+          <div className="desktop-icon-label">Discaya files</div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto p-4">
         <div className="win-window mb-4">
           <div className="win-title-bar flex items-center justify-between px-2 py-1">
@@ -533,6 +682,9 @@ const ZaldyCoGame = () => {
           </div>
         </div>
       </div>
+
+      {/* Recycle Bin Window */}
+      <RecycleBinWindow />
     </div>
   );
 };
