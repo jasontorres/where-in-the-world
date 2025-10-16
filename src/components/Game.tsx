@@ -305,20 +305,9 @@ const ZaldyCoGame = () => {
 
   if (!gameState.gameStarted) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
-        {/* Desktop Icons - Fixed at bottom left */}
-        <div className="fixed bottom-4 left-4 flex gap-2 z-10">
-          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
-            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Recycle Bin</div>
-          </div>
-          <div className="desktop-icon">
-            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Discaya files</div>
-          </div>
-        </div>
-
-        <div className="max-w-4xl w-full win-window">
+      <div className="min-h-screen p-4" style={{background: 'var(--win-desktop)'}}>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <div className="max-w-4xl w-full win-window mb-4">
           {/* Title Bar */}
           <div className="win-title-bar flex items-center justify-between px-2 py-1">
             <div className="flex items-center gap-2">
@@ -381,6 +370,19 @@ const ZaldyCoGame = () => {
           </div>
         </div>
 
+        {/* Desktop Icons - Below main container */}
+        <div className="flex gap-2 justify-center mt-4">
+          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
+            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Recycle Bin</div>
+          </div>
+          <div className="desktop-icon">
+            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Discaya files</div>
+          </div>
+        </div>
+      </div>
+
         {/* Recycle Bin Window */}
         <RecycleBinWindow />
       </div>
@@ -391,20 +393,9 @@ const ZaldyCoGame = () => {
 
   if (gameState.gameOver) {
     return (
-      <div className="min-h-screen relative flex items-center justify-center p-4" style={{background: 'var(--win-desktop)'}}>
-        {/* Desktop Icons - Fixed at bottom left */}
-        <div className="fixed bottom-4 left-4 flex gap-2 z-10">
-          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
-            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Recycle Bin</div>
-          </div>
-          <div className="desktop-icon">
-            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Discaya files</div>
-          </div>
-        </div>
-
-        <div className="max-w-3xl w-full win-window">
+      <div className="min-h-screen p-4" style={{background: 'var(--win-desktop)'}}>
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <div className="max-w-3xl w-full win-window mb-4">
           <div className="win-title-bar px-2 py-1">
             <span className="text-white font-bold">{gameState.gameWon ? 'Case Closed!' : 'Case File - Closed'}</span>
           </div>
@@ -456,6 +447,19 @@ const ZaldyCoGame = () => {
           </div>
         </div>
 
+        {/* Desktop Icons - Below main container */}
+        <div className="flex gap-2 justify-center mt-4">
+          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
+            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Recycle Bin</div>
+          </div>
+          <div className="desktop-icon">
+            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
+            <div className="desktop-icon-label">Discaya files</div>
+          </div>
+        </div>
+      </div>
+
         {/* Recycle Bin Window */}
         <RecycleBinWindow />
       </div>
@@ -463,19 +467,7 @@ const ZaldyCoGame = () => {
   }
 
   return (
-    <div className="min-h-screen relative" style={{background: 'var(--win-desktop)'}}>
-      {/* Desktop Icons - Fixed at bottom left */}
-      <div className="fixed bottom-4 left-4 flex gap-2 z-10">
-        <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
-          <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
-          <div className="desktop-icon-label">Recycle Bin</div>
-        </div>
-        <div className="desktop-icon">
-          <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
-          <div className="desktop-icon-label">Discaya files</div>
-        </div>
-      </div>
-
+    <div className="min-h-screen" style={{background: 'var(--win-desktop)'}}>
       <div className="max-w-7xl mx-auto p-4">
         <div className="win-window mb-4">
           <div className="win-title-bar flex items-center justify-between px-2 py-1">
@@ -680,6 +672,18 @@ const ZaldyCoGame = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Desktop Icons - Below main container */}
+      <div className="flex gap-2 justify-end pr-4 pb-8">
+        <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
+          <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
+          <div className="desktop-icon-label">Recycle Bin</div>
+        </div>
+        <div className="desktop-icon">
+          <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
+          <div className="desktop-icon-label">Discaya files</div>
         </div>
       </div>
 
