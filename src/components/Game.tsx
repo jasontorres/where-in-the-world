@@ -68,10 +68,6 @@ const ZaldyCoGame = () => {
   });
 
   const startGame = () => {
-    // Debug: Log the trail for testing (remove in production)
-    console.log('🔍 SUSPECT TRAIL (DEV MODE):', suspect.trail.map(loc => locations[loc].name));
-    console.log('📍 Final Location:', locations[suspect.currentLocation].name);
-    
     setGameState({
       ...gameState,
       gameStarted: true,
@@ -371,7 +367,7 @@ const ZaldyCoGame = () => {
         </div>
 
         {/* Desktop Icons - Below main container */}
-        <div className="flex gap-2 justify-center mt-4">
+        <div className="flex gap-2 justify-end pr-4 mt-4">
           <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
             <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
             <div className="desktop-icon-label">Recycle Bin</div>
@@ -448,7 +444,7 @@ const ZaldyCoGame = () => {
         </div>
 
         {/* Desktop Icons - Below main container */}
-        <div className="flex gap-2 justify-center mt-4">
+        <div className="flex gap-2 justify-end pr-4 mt-4">
           <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
             <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
             <div className="desktop-icon-label">Recycle Bin</div>
