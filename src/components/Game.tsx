@@ -1,9 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Typewriter from './Typewriter';
 
 type EvidenceKey = 'identity' | 'vehicle' | 'hideout' | 'motive';
 type GamePhase = 'active' | 'won' | 'lost';
 type MobilePanel = 'interview' | 'map' | 'clues';
+type GameSound = 'button' | 'tab' | 'clue' | 'lead' | 'scan' | 'travel' | 'warrant' | 'win' | 'lost';
+
+const audioAssets = {
+  music: '/audio/music-europe-chase.mp3',
+  button: '/audio/sfx-button-pop.mp3',
+  tab: '/audio/sfx-tab-swipe.mp3',
+  clue: '/audio/sfx-clue-reveal.mp3',
+  lead: '/audio/sfx-lead-found.mp3',
+  scan: '/audio/sfx-scan-ping.mp3',
+  travel: '/audio/sfx-travel-whoosh.mp3',
+  warrant: '/audio/sfx-warrant-stamp.mp3',
+  win: '/audio/sfx-case-win.mp3',
+  lost: '/audio/sfx-case-lost.mp3',
+} as const;
 
 interface Witness {
   name: string;
@@ -374,6 +388,10 @@ const Game = () => {
   const [showHowToPlay, setShowHowToPlay] = useState(true);
   const [pendingTravel, setPendingTravel] = useState<string | null>(null);
   const [mobilePanel, setMobilePanel] = useState<MobilePanel>('interview');
+  const [audioEnabled, setAudioEnabled] = useState(true);
+  const [audioUnlocked, setAudioUnlocked] = useState(false);
+  const musicRef = useRef<HTMLAudioElement | null>(null);
+  const sfxRefs = useRef<Partial<Record<GameSound, HTMLAudioElement>>>({});
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -386,6 +404,72 @@ const Game = () => {
       window.clearInterval(interval);
       window.clearTimeout(timeout);
     };
+  }, []);
+
+  useEffect(() => {
+    const music = new Audio(audioAssets.music);
+    music.loop = true;
+    music.volume = 0.16;
+    music.preload = 'auto';
+    musicRef.current = music;
+
+    (Object.keys(audioAssets) as Array<keyof typeof audioAssets>).forEach((key) => {
+      if (key === 'music') return;
+
+      const sound = new Audio(audioAssets[key]);
+      sound.preload = 'auto';
+      sound.volume = key === 'button' || key === 'tab' ? 0.42 : 0.55;
+      sfxRefs.current[key] = sound;
+    });
+
+    return () => {
+      music.pause();
+      Object.values(sfxRefs.current).forEach((sound) => sound?.pause());
+    };
+  }, []);
+
+  useEffect(() => {
+    const music = musicRef.current;
+    if (!music) return;
+
+    if (audioEnabled && audioUnlocked && !isLoading && !showHowToPlay) {
+      music.play().catch(() => {});
+    } else {
+      music.pause();
+    }
+  }, [audioEnabled, audioUnlocked, isLoading, showHowToPlay]);
+
+  const playSound = useCallback((soundKey: GameSound) => {
+    if (!audioEnabled) return;
+
+    const sound = sfxRefs.current[soundKey];
+    if (!sound) return;
+
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+  }, [audioEnabled]);
+
+  const startGameAudio = useCallback(() => {
+    setAudioUnlocked(true);
+    if (audioEnabled) {
+      musicRef.current?.play().catch(() => {});
+    }
+  }, [audioEnabled]);
+
+  const toggleAudio = useCallback(() => {
+    setAudioUnlocked(true);
+    setAudioEnabled((enabled) => {
+      const nextEnabled = !enabled;
+
+      if (nextEnabled) {
+        musicRef.current?.play().catch(() => {});
+      } else {
+        musicRef.current?.pause();
+        Object.values(sfxRefs.current).forEach((sound) => sound?.pause());
+      }
+
+      return nextEnabled;
+    });
   }, []);
 
   const currentCity = cityData[gameState.currentCity];
@@ -438,6 +522,7 @@ const Game = () => {
         avatar: witness.avatar,
       },
     }));
+    playSound(type === 'route' ? 'lead' : 'clue');
   };
 
   const travelTo = (cityId: string) => {
@@ -451,6 +536,7 @@ const Game = () => {
     const heat = Math.min(5, gameState.heat + (correctNext || followsKnownTrail ? 0 : 1));
 
     if (daysLeft <= 0) {
+      playSound('lost');
       setGameState(resetTypewriter({
         phase: 'lost',
         daysLeft: 0,
@@ -494,6 +580,7 @@ const Game = () => {
       return;
     }
 
+    playSound('button');
     setPendingTravel(cityId);
   };
 
@@ -502,6 +589,7 @@ const Game = () => {
 
     const destination = pendingTravel;
     setPendingTravel(null);
+    playSound('travel');
     travelTo(destination);
   };
 
@@ -533,12 +621,14 @@ const Game = () => {
         avatar: '📡',
       },
     }));
+    playSound('scan');
   };
 
   const issueWarrant = () => {
     if (gameState.phase !== 'active') return;
 
     if (isFinalCity && hasEnoughEvidence) {
+      playSound('win');
       setGameState(resetTypewriter({
         phase: 'won',
         showTravel: false,
@@ -555,6 +645,7 @@ const Game = () => {
     }
 
     const daysLeft = gameState.daysLeft - 1;
+    playSound(daysLeft <= 0 ? 'lost' : 'warrant');
     setGameState(resetTypewriter({
       daysLeft,
       heat: Math.min(5, gameState.heat + 1),
@@ -575,6 +666,7 @@ const Game = () => {
 
   const newCase = () => {
     const nextCase = createCase();
+    playSound('button');
     setCaseFile(nextCase);
     setGameState(buildNewState());
     setShowHowToPlay(true);
@@ -584,11 +676,28 @@ const Game = () => {
   const toggleTravelMode = () => {
     if (gameState.phase !== 'active') return;
 
+    playSound('button');
     setGameState({
       ...gameState,
       showTravel: !gameState.showTravel,
     });
     setMobilePanel('map');
+  };
+
+  const closeHowToPlay = () => {
+    playSound('button');
+    startGameAudio();
+    setShowHowToPlay(false);
+  };
+
+  const switchMobilePanel = (panel: MobilePanel) => {
+    playSound('tab');
+    setMobilePanel(panel);
+  };
+
+  const cancelTravel = () => {
+    playSound('button');
+    setPendingTravel(null);
   };
 
   const evidenceCount = Object.keys(gameState.evidence).length;
@@ -638,11 +747,16 @@ const Game = () => {
           <p className="eyebrow">International Corruption Desk</p>
           <h1>Where in Europe is Zaldy Co?</h1>
         </div>
-        <div className="score-strip" aria-label="Case meters">
-          <div className="hud-token days"><b>⏱</b><span>{gameState.daysLeft}</span><small>Days</small></div>
-          <div className="hud-token clues"><b>🔎</b><span>{evidenceCount}/4</span><small>Clues</small></div>
-          <div className="hud-token assists"><b>📡</b><span>{gameState.gumdrops}</span><small>Boosts</small></div>
-          <div className="hud-token heat"><b>🔥</b><span>{gameState.heat}</span><small>Heat</small></div>
+        <div className="topbar-hud">
+          <div className="score-strip" aria-label="Case meters">
+            <div className="hud-token days"><b>⏱</b><span>{gameState.daysLeft}</span><small>Days</small></div>
+            <div className="hud-token clues"><b>🔎</b><span>{evidenceCount}/4</span><small>Clues</small></div>
+            <div className="hud-token assists"><b>📡</b><span>{gameState.gumdrops}</span><small>Boosts</small></div>
+            <div className="hud-token heat"><b>🔥</b><span>{gameState.heat}</span><small>Heat</small></div>
+          </div>
+          <button className={`audio-toggle ${audioEnabled ? '' : 'muted'}`} onClick={toggleAudio} aria-label={audioEnabled ? 'Mute game audio' : 'Unmute game audio'} title={audioEnabled ? 'Mute audio' : 'Unmute audio'}>
+            {audioEnabled ? '🔊' : '🔇'}
+          </button>
         </div>
       </section>
 
@@ -655,7 +769,7 @@ const Game = () => {
                 <Typewriter
                   text={gameState.conversation.text}
                   speed={7}
-                  enableSound={false}
+                  enableSound={audioEnabled && audioUnlocked}
                   className="dialogue-text"
                   onComplete={() => setGameState((state) => ({ ...state, typewriterComplete: true }))}
                 />
@@ -788,15 +902,15 @@ const Game = () => {
             </nav>
           )}
           <nav className="mobile-tabbar" aria-label="Mobile panel navigation">
-            <button className={mobilePanel === 'interview' ? 'active' : ''} onClick={() => setMobilePanel('interview')}>
+            <button className={mobilePanel === 'interview' ? 'active' : ''} onClick={() => switchMobilePanel('interview')}>
               <span>🗣</span>
               Interview
             </button>
-            <button className={mobilePanel === 'map' ? 'active' : ''} onClick={() => setMobilePanel('map')}>
+            <button className={mobilePanel === 'map' ? 'active' : ''} onClick={() => switchMobilePanel('map')}>
               <span>🗺</span>
               Map
             </button>
-            <button className={mobilePanel === 'clues' ? 'active' : ''} onClick={() => setMobilePanel('clues')}>
+            <button className={mobilePanel === 'clues' ? 'active' : ''} onClick={() => switchMobilePanel('clues')}>
               <span>🔎</span>
               Clues
             </button>
@@ -821,7 +935,7 @@ const Game = () => {
                 </button>
               </div>
               <p>Interview witnesses, click luggage on the map to travel, and watch for named cities in clues: they unlock special clue-lead routes. Use Scan if the audit trail goes cold, then issue the Warrant after collecting 3 evidence cards.</p>
-              <button className="candy-button primary next-action" onClick={() => setShowHowToPlay(false)}>
+              <button className="candy-button primary next-action" onClick={closeHowToPlay}>
                 <span>▶</span> Play
               </button>
             </div>
@@ -843,7 +957,7 @@ const Game = () => {
                 <button className="candy-button travel next-action" onClick={confirmTravel}>
                   <span>✈</span> Confirm
                 </button>
-                <button className="candy-button danger" onClick={() => setPendingTravel(null)}>
+                <button className="candy-button danger" onClick={cancelTravel}>
                   <span>×</span> Cancel
                 </button>
               </div>

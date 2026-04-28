@@ -30,25 +30,38 @@ const Typewriter = ({ text, speed = 10, onComplete, className = "", enableSound 
 
   // Start/stop audio based on typing state
   useEffect(() => {
-    if (enableSound) {
-      const audio = getAudio();
-      
-      if (currentIndex < text.length && !isComplete) {
-        // Start playing if not already
-        if (!isTypingRef.current) {
-          isTypingRef.current = true;
-          audio.play().catch(() => {});
-        }
-      } else {
-        // Stop playing when done
-        if (isTypingRef.current) {
-          isTypingRef.current = false;
-          audio.pause();
-          audio.currentTime = 0;
-        }
+    const audio = getAudio();
+
+    if (!enableSound) {
+      if (isTypingRef.current) {
+        isTypingRef.current = false;
+        audio.pause();
+        audio.currentTime = 0;
       }
+      return;
     }
+
+    if (currentIndex < text.length && !isComplete) {
+      if (!isTypingRef.current) {
+        isTypingRef.current = true;
+        audio.play().catch(() => {});
+      }
+    } else if (isTypingRef.current) {
+      isTypingRef.current = false;
+      audio.pause();
+      audio.currentTime = 0;
+    }
+
   }, [currentIndex, text.length, isComplete, enableSound]);
+
+  useEffect(() => () => {
+    if (isTypingRef.current) {
+      const audio = getAudio();
+      isTypingRef.current = false;
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  }, []);
 
   useEffect(() => {
     if (currentIndex < text.length) {

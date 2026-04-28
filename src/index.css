@@ -168,6 +168,41 @@ p {
   gap: 10px;
 }
 
+.topbar-hud {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audio-toggle {
+  flex: 0 0 auto;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 4px solid #263050;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.38) 28%, rgba(255, 255, 255, 0) 29%),
+    linear-gradient(180deg, #7df4ff, #2d79ff);
+  cursor: pointer;
+  font-size: 1.2rem;
+  box-shadow: inset 0 -7px 0 rgba(0, 44, 126, 0.2), 0 5px 0 #263050, 0 0 18px rgba(125, 244, 255, 0.62);
+  transition: transform 130ms ease, filter 130ms ease, box-shadow 130ms ease;
+}
+
+.audio-toggle:hover {
+  filter: saturate(1.25) brightness(1.12);
+  transform: translateY(-2px) scale(1.04);
+}
+
+.audio-toggle.muted {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.38) 28%, rgba(255, 255, 255, 0) 29%),
+    linear-gradient(180deg, #ffb0ee, #ff2ea6);
+  box-shadow: inset 0 -7px 0 rgba(112, 0, 62, 0.2), 0 5px 0 #263050, 0 0 18px rgba(255, 46, 166, 0.5);
+}
+
 .hud-token {
   position: relative;
   display: grid;
@@ -1463,6 +1498,23 @@ p {
     gap: 5px;
   }
 
+  .topbar-hud {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    align-items: stretch;
+  }
+
+  .audio-toggle {
+    width: 46px;
+    height: auto;
+    min-height: 42px;
+    border-width: 3px;
+    border-radius: 13px;
+    font-size: 1rem;
+    box-shadow: inset 0 -4px 0 rgba(0, 44, 126, 0.2), 0 3px 0 #263050, 0 0 14px rgba(125, 244, 255, 0.52);
+  }
+
   .hud-token {
     min-width: 0;
     grid-template-columns: 1fr;
@@ -1760,6 +1812,17 @@ p {
 
   .score-strip {
     gap: 4px;
+  }
+
+  .topbar-hud {
+    gap: 4px;
+  }
+
+  .audio-toggle {
+    width: 40px;
+    min-height: 38px;
+    border-radius: 11px;
+    font-size: 0.9rem;
   }
 
   .score-strip span {

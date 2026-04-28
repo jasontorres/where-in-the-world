@@ -1,0 +1,66 @@
+{
+  "generatedWith": "ElevenLabs sound-generation",
+  "purpose": "Where in Europe is Zaldy Co game audio pack",
+  "assets": [
+    {
+      "file": "/audio/music-europe-chase.mp3",
+      "durationSeconds": 24,
+      "prompt": "loopable upbeat detective chase background music for a cartoony Europe map investigation game, glossy mobile game style, playful marimba, pizzicato strings, light spy brass, bouncy percussion, subtle airport ambience, no vocals, clean seamless loop, 118 BPM",
+      "sizeBytes": 384984
+    },
+    {
+      "file": "/audio/sfx-button-pop.mp3",
+      "durationSeconds": 0.8,
+      "prompt": "very short glossy candy mobile game button pop, bright bubbly click, satisfying, playful, no voice, under one second",
+      "sizeBytes": 13836
+    },
+    {
+      "file": "/audio/sfx-tab-swipe.mp3",
+      "durationSeconds": 0.8,
+      "prompt": "short mobile game tab switch sound, slick bubble swipe, soft chime finish, playful cartoon detective interface, no voice, under one second",
+      "sizeBytes": 13836
+    },
+    {
+      "file": "/audio/sfx-clue-reveal.mp3",
+      "durationSeconds": 1.2,
+      "prompt": "cartoon detective clue reveal sound, paper rustle, magnifying glass sparkle, bright chime, satisfying discovery, no voice, one second",
+      "sizeBytes": 20106
+    },
+    {
+      "file": "/audio/sfx-lead-found.mp3",
+      "durationSeconds": 1.2,
+      "prompt": "new travel lead found in a detective game, suitcase tag sparkle, airport ding, playful mystery chime, no voice, one second",
+      "sizeBytes": 20106
+    },
+    {
+      "file": "/audio/sfx-scan-ping.mp3",
+      "durationSeconds": 1.3,
+      "prompt": "cartoony radar scanner ping for a clue scan action, digital sweep, bright ping, playful mobile game sound, no voice, about one second",
+      "sizeBytes": 21359
+    },
+    {
+      "file": "/audio/sfx-travel-whoosh.mp3",
+      "durationSeconds": 1.5,
+      "prompt": "cartoon airplane travel whoosh across a Europe map, cheerful jet pass, sparkling passport stamp finish, no voice, one and a half seconds",
+      "sizeBytes": 24703
+    },
+    {
+      "file": "/audio/sfx-warrant-stamp.mp3",
+      "durationSeconds": 1.2,
+      "prompt": "comic legal warrant stamp sound, heavy rubber stamp thump, paper slap, tiny triumphant chime, satirical detective game, no voice, one second",
+      "sizeBytes": 20106
+    },
+    {
+      "file": "/audio/sfx-case-win.mp3",
+      "durationSeconds": 3.4,
+      "prompt": "short victory fanfare for cartoony detective chase game, brass flourish, sparkling mobile game reward, passport stamp rhythm, upbeat but not casino, no voice, three seconds",
+      "sizeBytes": 55632
+    },
+    {
+      "file": "/audio/sfx-case-lost.mp3",
+      "durationSeconds": 2.4,
+      "prompt": "short comedic case failed sting for cartoon detective game, slide whistle down, soft paperwork flutter, minor chord but playful, no voice, two seconds",
+      "sizeBytes": 39332
+    }
+  ]
+}
