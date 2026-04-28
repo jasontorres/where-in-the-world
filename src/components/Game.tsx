@@ -1,692 +1,858 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import Typewriter from './Typewriter';
-import { locations, type Witness } from '../data/locations';
-import { createSuspect } from '../data/suspects';
-import { generateClue as generateClueFromBank } from '../data/clues';
+
+type EvidenceKey = 'identity' | 'vehicle' | 'hideout' | 'motive';
+type GamePhase = 'active' | 'won' | 'lost';
+type MobilePanel = 'interview' | 'map' | 'clues';
+
+interface Witness {
+  name: string;
+  role: string;
+  spot: string;
+  avatar: string;
+}
+
+interface City {
+  id: string;
+  name: string;
+  country: string;
+  tagline: string;
+  color: string;
+  x: number;
+  y: number;
+  connections: string[];
+  witnesses: Witness[];
+  flavor: string[];
+}
+
+interface CaseFile {
+  trail: string[];
+  finalCity: string;
+  dossier: Record<EvidenceKey, string>;
+}
+
+interface LogEntry {
+  id: number;
+  city: string;
+  source: string;
+  clue: string;
+  type: EvidenceKey | 'route' | 'decoy';
+}
 
 interface Conversation {
   speaker: string;
+  meta: string;
   text: string;
-  avatarUrl?: string;
-}
-
-interface Clue {
-  source: string;
-  location: string;
-  clue: string;
-  type: string;
-}
-
-interface Evidence {
-  appearance: string | null;
-  hobby: string | null;
-  vehicle: string | null;
-  trait: string | null;
+  avatar?: string;
 }
 
 interface GameState {
-  currentLocation: string;
-  previousLocation: string | null;
-  visitedLocations: string[];
-  cluesCollected: Clue[];
-  daysRemaining: number;
-  gameStarted: boolean;
-  gameOver: boolean;
-  gameWon: boolean;
-  selectedWitness: Witness | null;
+  phase: GamePhase;
+  currentCity: string;
+  previousCity: string | null;
+  daysLeft: number;
+  heat: number;
+  gumdrops: number;
+  visited: string[];
+  evidence: Partial<Record<EvidenceKey, string>>;
+  log: LogEntry[];
+  conversation: Conversation;
   showTravel: boolean;
-  conversation: Conversation | null;
-  evidence: Evidence;
   typewriterComplete: boolean;
-  showRecycleBin: boolean;
+  warrantReady: boolean;
 }
 
-const ZaldyCoGame = () => {
-  // Create suspect with random location once per game
-  const suspect = useMemo(() => createSuspect(), []);
+const cityData: Record<string, City> = {
+  manila: {
+    id: 'manila',
+    name: 'Manila',
+    country: 'Philippines',
+    tagline: 'Flood files, airport whispers, and one very nervous paper trail.',
+    color: '#ff7a59',
+    x: 10,
+    y: 74,
+    connections: ['london', 'paris', 'rome'],
+    witnesses: [
+      { name: 'Budget Beat Reporter', role: 'Press', spot: 'Quezon City newsroom', avatar: '🗞️' },
+      { name: 'Airport Ramp Clerk', role: 'Aviation', spot: 'VIP apron', avatar: '🛫' },
+      { name: 'Flood Project Engineer', role: 'Whistleblower', spot: 'Drainage site', avatar: '🧰' },
+    ],
+    flavor: [
+      'A sticker-covered evidence crate sits under a leaky office aircon.',
+      'Every folder points toward Europe, but the labels have been shuffled.',
+      'A customs stamp smells faintly of bubblegum and jet fuel.',
+    ],
+  },
+  london: {
+    id: 'london',
+    name: 'London',
+    country: 'United Kingdom',
+    tagline: 'Red buses, rain clouds, and bankers who blink twice before answering.',
+    color: '#44b3ff',
+    x: 36,
+    y: 26,
+    connections: ['manila', 'paris', 'amsterdam', 'geneva'],
+    witnesses: [
+      { name: 'Night Porter', role: 'Hotel Staff', spot: 'Mayfair lobby', avatar: '🛎️' },
+      { name: 'Archive Clerk', role: 'Records', spot: 'Companies registry desk', avatar: '📇' },
+      { name: 'Cab Dispatcher', role: 'Transport', spot: 'Victoria station', avatar: '🚕' },
+    ],
+    flavor: [
+      'A taxi receipt has a coffee ring exactly over the destination.',
+      'The rain turns every neon sign into a watercolor clue.',
+      'Someone left a passport sleeve tucked behind a hotel piano.',
+    ],
+  },
+  paris: {
+    id: 'paris',
+    name: 'Paris',
+    country: 'France',
+    tagline: 'Macarons, metro maps, and a briefcase changing hands near the Seine.',
+    color: '#ff5fab',
+    x: 41,
+    y: 39,
+    connections: ['manila', 'london', 'geneva', 'madrid', 'rome'],
+    witnesses: [
+      { name: 'Cafe Owner', role: 'Local Tipster', spot: 'Left Bank terrace', avatar: '☕' },
+      { name: 'Gallery Guard', role: 'Security', spot: 'Private viewing room', avatar: '🖼️' },
+      { name: 'Metro Busker', role: 'Street Witness', spot: 'Chatelet platform', avatar: '🎷' },
+    ],
+    flavor: [
+      'A pastry box contains crumbs, a boarding stub, and a tiny gold button.',
+      'The suspect ordered tea at a coffee bar. Suspicious behavior, honestly.',
+      'A boutique receipt is folded into a paper airplane.',
+    ],
+  },
+  amsterdam: {
+    id: 'amsterdam',
+    name: 'Amsterdam',
+    country: 'Netherlands',
+    tagline: 'Canals, bikes, and shell-company names written in blue ink.',
+    color: '#20c997',
+    x: 45,
+    y: 25,
+    connections: ['london', 'geneva', 'prague', 'vienna'],
+    witnesses: [
+      { name: 'Canal Boat Captain', role: 'Guide', spot: 'Prinsengracht dock', avatar: '⛵' },
+      { name: 'Bike Courier', role: 'Courier', spot: 'Dam Square', avatar: '🚲' },
+      { name: 'Trust Office Intern', role: 'Finance', spot: 'Zuidas tower', avatar: '📎' },
+    ],
+    flavor: [
+      'The canal looks calm. The paper trail absolutely does not.',
+      'A bike bell rings twice whenever someone says "beneficial owner."',
+      'A soggy envelope carries three stamps and no return address.',
+    ],
+  },
+  geneva: {
+    id: 'geneva',
+    name: 'Geneva',
+    country: 'Switzerland',
+    tagline: 'Alpine chocolate, watch shops, and private ledgers with polite smiles.',
+    color: '#7b61ff',
+    x: 48,
+    y: 49,
+    connections: ['london', 'paris', 'amsterdam', 'vienna', 'rome'],
+    witnesses: [
+      { name: 'Watchmaker', role: 'Luxury Dealer', spot: 'Rue du Rhone', avatar: '⌚' },
+      { name: 'Compliance Officer', role: 'Banking', spot: 'Lakefront office', avatar: '🏦' },
+      { name: 'Ski Chauffeur', role: 'Driver', spot: 'Airport lounge', avatar: '🚗' },
+    ],
+    flavor: [
+      'Everyone is extremely calm, which makes the alarm bells louder.',
+      'A chocolate box hides a deposit slip beneath the pralines.',
+      'The lake reflects mountains, clouds, and a suspicious tail number.',
+    ],
+  },
+  madrid: {
+    id: 'madrid',
+    name: 'Madrid',
+    country: 'Spain',
+    tagline: 'Sunny plazas, late dinners, and a red scarf left at a hotel desk.',
+    color: '#ffb000',
+    x: 34,
+    y: 63,
+    connections: ['paris', 'rome', 'athens'],
+    witnesses: [
+      { name: 'Tapas Waiter', role: 'Hospitality', spot: 'Plaza Mayor', avatar: '🍽️' },
+      { name: 'Museum Docent', role: 'Culture', spot: 'Private tour wing', avatar: '🎨' },
+      { name: 'Station Cleaner', role: 'Rail Staff', spot: 'Atocha concourse', avatar: '🧹' },
+    ],
+    flavor: [
+      'A napkin sketch shows a plane, a villa, and a question mark.',
+      'The late-night dinner reservation used three different names.',
+      'Someone paid cash and tipped with a foreign coin.',
+    ],
+  },
+  rome: {
+    id: 'rome',
+    name: 'Rome',
+    country: 'Italy',
+    tagline: 'Ancient stones, scooter smoke, and modern money moving fast.',
+    color: '#ff6b6b',
+    x: 55,
+    y: 66,
+    connections: ['manila', 'paris', 'geneva', 'madrid', 'athens', 'vienna'],
+    witnesses: [
+      { name: 'Scooter Mechanic', role: 'Street Lead', spot: 'Trastevere garage', avatar: '🛵' },
+      { name: 'Boutique Tailor', role: 'Merchant', spot: 'Via Condotti', avatar: '🧵' },
+      { name: 'Airport Caterer', role: 'Aviation', spot: 'Ciampino service gate', avatar: '🥐' },
+    ],
+    flavor: [
+      'A gelato spoon is stuck to a confidential envelope.',
+      'Every cobblestone seems to point toward another airport.',
+      'A tailor remembers the watch, the smile, and the rush order.',
+    ],
+  },
+  vienna: {
+    id: 'vienna',
+    name: 'Vienna',
+    country: 'Austria',
+    tagline: 'Opera tickets, cream cakes, and a meeting timed to the minute.',
+    color: '#b66dff',
+    x: 61,
+    y: 45,
+    connections: ['amsterdam', 'geneva', 'rome', 'prague', 'athens'],
+    witnesses: [
+      { name: 'Opera Usher', role: 'Venue Staff', spot: 'Box balcony', avatar: '🎭' },
+      { name: 'Pastry Chef', role: 'Cafe Lead', spot: 'Ringstrasse cafe', avatar: '🍰' },
+      { name: 'Train Conductor', role: 'Rail', spot: 'Hauptbahnhof', avatar: '🚆' },
+    ],
+    flavor: [
+      'A program from last night has a departure time circled in jam.',
+      'The music is elegant. The alibi is not.',
+      'A locker key jingles like a tiny confession.',
+    ],
+  },
+  prague: {
+    id: 'prague',
+    name: 'Prague',
+    country: 'Czechia',
+    tagline: 'Clock towers, crooked lanes, and coded notes in a souvenir shop.',
+    color: '#36d399',
+    x: 59,
+    y: 35,
+    connections: ['amsterdam', 'vienna', 'geneva'],
+    witnesses: [
+      { name: 'Toymaker', role: 'Shopkeeper', spot: 'Old Town stall', avatar: '🧸' },
+      { name: 'Clock Keeper', role: 'Caretaker', spot: 'Astronomical clock', avatar: '🕰️' },
+      { name: 'Hostel Manager', role: 'Lodging', spot: 'Mala Strana', avatar: '🗝️' },
+    ],
+    flavor: [
+      'A wooden puppet points dramatically toward the train station.',
+      'The clock strikes noon; three witnesses suddenly remember appointments.',
+      'A souvenir snow globe contains a rolled-up baggage claim tag.',
+    ],
+  },
+  athens: {
+    id: 'athens',
+    name: 'Athens',
+    country: 'Greece',
+    tagline: 'Blue domes, ferry horns, and one last island-bound escape plan.',
+    color: '#23a6f0',
+    x: 69,
+    y: 76,
+    connections: ['rome', 'madrid', 'vienna'],
+    witnesses: [
+      { name: 'Ferry Agent', role: 'Harbor Staff', spot: 'Piraeus ticket booth', avatar: '⛴️' },
+      { name: 'Rooftop Host', role: 'Hotel Staff', spot: 'Monastiraki terrace', avatar: '🏨' },
+      { name: 'Antique Seller', role: 'Merchant', spot: 'Plaka lane', avatar: '🏺' },
+    ],
+    flavor: [
+      'The sea breeze carries a rumor about a chartered hop to nowhere.',
+      'A ferry ticket has been bought, cancelled, and bought again.',
+      'A rooftop receipt lists sparkling water and a burner phone charger.',
+    ],
+  },
+};
 
-  const [gameState, setGameState] = useState<GameState>({
-    currentLocation: "philippines",
-    previousLocation: null,
-    visitedLocations: ["philippines"],
-    cluesCollected: [],
-    daysRemaining: 7,
-    gameStarted: false,
-    gameOver: false,
-    gameWon: false,
-    selectedWitness: null,
-    showTravel: false,
-    conversation: null,
-    evidence: {
-      appearance: null,
-      hobby: null,
-      vehicle: null,
-      trait: null
+const routes = [
+  ['manila', 'london', 'amsterdam', 'prague'],
+  ['manila', 'paris', 'geneva', 'vienna'],
+  ['manila', 'rome', 'athens'],
+  ['manila', 'london', 'geneva', 'rome', 'madrid'],
+  ['manila', 'paris', 'madrid', 'athens'],
+  ['manila', 'rome', 'vienna', 'prague'],
+];
+
+const evidenceLabels: Record<EvidenceKey, string> = {
+  identity: 'Identity',
+  vehicle: 'Transport',
+  hideout: 'Hideout',
+  motive: 'Pattern',
+};
+
+const createCase = (): CaseFile => {
+  const trail = routes[Math.floor(Math.random() * routes.length)];
+  const finalCity = trail[trail.length - 1];
+
+  return {
+    trail,
+    finalCity,
+    dossier: {
+      identity: 'A well-known Filipino political figure using aides, initials, and hotel aliases softer than a committee subpoena.',
+      vehicle: 'A private aircraft trail with luxury service invoices, VIP apron access, and baggage tags that forgot to plead the Fifth.',
+      hideout: `A reserved suite and security detail near ${cityData[finalCity].name}.`,
+      motive: 'Avoiding public inquiries tied to alleged flood-control budget irregularities and mysteriously dry paper trails.',
     },
+  };
+};
+
+const buildOpening = (): Conversation => ({
+  speaker: 'Chief Auditor',
+  meta: 'International Corruption Desk',
+  text:
+    'Agent, welcome to the Europe desk. This is a satirical detective game based on public reporting and allegations around Zaldy Co and flood-control budget inquiries. Follow the travel receipts, collect enough clues for a clean warrant, and catch the fugitive before the file gets buried under another urgent committee hearing. Start in Manila, interview witnesses, then hop across Europe one city at a time.',
+  avatar: '📋',
+});
+
+const buildNewState = (): GameState => ({
+  phase: 'active',
+  currentCity: 'manila',
+  previousCity: null,
+  daysLeft: 9,
+  heat: 0,
+  gumdrops: 3,
+  visited: ['manila'],
+  evidence: {},
+  log: [],
+  conversation: buildOpening(),
+  showTravel: false,
+  typewriterComplete: false,
+  warrantReady: false,
+});
+
+const pick = <T,>(items: T[]): T => items[Math.floor(Math.random() * items.length)];
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const getMentionedCityIds = (text: string): string[] => (
+  Object.values(cityData)
+    .filter((city) => new RegExp(`\\b${escapeRegExp(city.name)}\\b`, 'i').test(text))
+    .map((city) => city.id)
+);
+
+const getRouteClue = (caseFile: CaseFile, currentCity: string): string => {
+  const trailIndex = caseFile.trail.indexOf(currentCity);
+
+  if (trailIndex >= 0 && trailIndex < caseFile.trail.length - 1) {
+    const nextCity = cityData[caseFile.trail[trailIndex + 1]];
+    return pick([
+      `A rushed airport receipt points to ${nextCity.name}. Even alleged escape plans need paperwork.`,
+      `The booking clerk heard ${nextCity.name} twice: once from an aide, once from a pilot who sounded allergic to subpoenas.`,
+      `A luggage tag points to ${nextCity.name}. The handwriting is careful, but the panic has its own font.`,
+      `The next stamp in the passport trail is ${nextCity.name}. Follow it before the paper trail gets flood-damaged.`,
+      `A fixer whispered ${nextCity.name} while pretending to discuss drainage canals. Subtle as a missing budget line.`,
+    ]);
+  }
+
+  if (trailIndex === caseFile.trail.length - 1) {
+    return 'The clues stop here. Witnesses are whispering about a private room, nervous security, and a fresh escape plan with better drainage than the projects in the file.';
+  }
+
+  return pick([
+    'This lead is flashy but hollow. The person seen here was probably a decoy with a fancy watch and a flexible memory.',
+    'A rumor passed through, but it feels stale. Check a connected city and compare your passport stamps.',
+    'The trail here is colder than an unfinished flood-control canal. Someone may be trying to loop you backward.',
+  ]);
+};
+
+const getEvidenceClue = (caseFile: CaseFile, key: EvidenceKey): string => {
+  const clue = caseFile.dossier[key];
+
+  return pick([
+    `${evidenceLabels[key]} clue: ${clue}`,
+    `Add this to the warrant board. ${clue}`,
+    `That detail matters. ${clue}`,
+  ]);
+};
+
+const Game = () => {
+  const [caseFile, setCaseFile] = useState<CaseFile>(() => createCase());
+  const [gameState, setGameState] = useState<GameState>(() => buildNewState());
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [showHowToPlay, setShowHowToPlay] = useState(true);
+  const [pendingTravel, setPendingTravel] = useState<string | null>(null);
+  const [mobilePanel, setMobilePanel] = useState<MobilePanel>('interview');
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setLoadingProgress((progress) => Math.min(100, progress + 4));
+    }, 55);
+
+    const timeout = window.setTimeout(() => setIsLoading(false), 1700);
+
+    return () => {
+      window.clearInterval(interval);
+      window.clearTimeout(timeout);
+    };
+  }, []);
+
+  const currentCity = cityData[gameState.currentCity];
+  const hasEnoughEvidence = Object.keys(gameState.evidence).length >= 3;
+  const isFinalCity = gameState.currentCity === caseFile.finalCity;
+  const trailIndex = caseFile.trail.indexOf(gameState.currentCity);
+  const clueLeadCityIds = Array.from(new Set(
+    gameState.log
+      .flatMap((entry) => getMentionedCityIds(entry.clue))
+      .filter((cityId) => cityId !== gameState.currentCity),
+  ));
+  const travelOptions = Array.from(new Set([...currentCity.connections, ...clueLeadCityIds]));
+  const hasRouteLead = gameState.log.some((entry) => entry.type === 'route' && entry.city === currentCity.name)
+    || clueLeadCityIds.length > 0;
+
+  const resetTypewriter = (updates: Partial<GameState>): GameState => ({
+    ...gameState,
+    ...updates,
     typewriterComplete: false,
-    showRecycleBin: false
   });
 
-  const startGame = () => {
-    setGameState({
-      ...gameState,
-      gameStarted: true,
-      typewriterComplete: false,
-      conversation: {
-        speaker: "ICI Chief Inspector",
-        text: "Agent, we have a national crisis. Congressman Zaldy Co, former chair of the House Appropriations Committee, has fled the country amid investigations into the 2025 Flood Control Budget Scandal. Over P100 billion in public funds were siphoned through rigged infrastructure deals, ghost projects, and kickbacks. While Filipinos drown in floods, Co bought a $36 million Gulfstream jet and a $16 million helicopter with OUR money. He left the USA on August 26 after medical treatment - his travel authority has been revoked. The President wants him found. You have 7 days to track him down before he disappears completely. The trail starts here in the Philippines. Don't let this traitor escape justice!"
-      }
-    });
-  };
-
   const interviewWitness = (witness: Witness) => {
-    if (gameState.daysRemaining <= 0) return;
+    if (gameState.phase !== 'active') return;
 
-    const currentLoc = gameState.currentLocation;
-    
-    // Check if current location is on the suspect's trail
-    const trailIndex = suspect.trail.indexOf(currentLoc);
-    const isOnTrail = trailIndex !== -1;
-    
-    // Determine next location in trail (if any)
-    let nextLocation: string | null = null;
-    let nextLocationName: string | null = null;
-    
-    if (isOnTrail && trailIndex < suspect.trail.length - 1) {
-      nextLocation = suspect.trail[trailIndex + 1];
-      nextLocationName = locations[nextLocation].name;
-    }
-    
-    // Generate clue using the new system
-    const clueResponse = generateClueFromBank(
-      witness,
-      suspect,
-      currentLoc,
-      isOnTrail,
-      nextLocation,
-      nextLocationName
-    );
+    const evidenceKeys = Object.keys(evidenceLabels) as EvidenceKey[];
+    const unknownEvidence = evidenceKeys.filter((key) => !gameState.evidence[key]);
+    const shouldGiveRoute = Math.random() < 0.58 || unknownEvidence.length === 0;
+    const type: EvidenceKey | 'route' | 'decoy' = shouldGiveRoute ? 'route' : pick(unknownEvidence);
+    const clue = type === 'route' ? getRouteClue(caseFile, gameState.currentCity) : getEvidenceClue(caseFile, type);
+    const nextEvidence = type !== 'route' && type !== 'decoy'
+      ? { ...gameState.evidence, [type]: caseFile.dossier[type] }
+      : gameState.evidence;
+    const nextLog: LogEntry = {
+      id: gameState.log.length + 1,
+      city: currentCity.name,
+      source: witness.name,
+      clue,
+      type,
+    };
 
-    // Generate consistent avatar for witness based on name
-    const witnessId = witness.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 70;
-    const avatarUrl = `https://i.pravatar.cc/100?img=${witnessId}`;
-
-    // Update evidence if this is a character clue (not direction)
-    const updatedEvidence = clueResponse.evidenceValue ? {
-      ...gameState.evidence,
-      [clueResponse.type]: clueResponse.evidenceValue
-    } : gameState.evidence;
-
-    setGameState({
-      ...gameState,
-      selectedWitness: witness,
-      typewriterComplete: false,
+    setGameState(resetTypewriter({
+      evidence: nextEvidence,
+      log: [nextLog, ...gameState.log],
+      warrantReady: Object.keys(nextEvidence).length >= 3,
+      showTravel: gameState.showTravel,
       conversation: {
         speaker: witness.name,
-        text: `${clueResponse.intro}\n\n${clueResponse.clue}`,
-        avatarUrl: avatarUrl
+        meta: `${witness.role} at ${witness.spot}`,
+        text: `${pick(currentCity.flavor)}\n\n${clue}`,
+        avatar: witness.avatar,
       },
-      cluesCollected: [...gameState.cluesCollected, {
-        source: witness.name,
-        location: locations[currentLoc].name,
-        clue: clueResponse.clue,
-        type: clueResponse.type
-      }],
-      evidence: updatedEvidence
-    });
+    }));
   };
 
-  const travelTo = (locationKey: string) => {
-    const newDays = gameState.daysRemaining - 1;
-    
-    if (newDays <= 0) {
-      setGameState({
-        ...gameState,
-        daysRemaining: 0,
-        gameOver: true,
+  const travelTo = (cityId: string) => {
+    if (gameState.phase !== 'active') return;
+
+    const daysLeft = gameState.daysLeft - 1;
+    const nextCity = cityData[cityId];
+    const correctNext = trailIndex >= 0 && caseFile.trail[trailIndex + 1] === cityId;
+    const destinationTrailIndex = caseFile.trail.indexOf(cityId);
+    const followsKnownTrail = destinationTrailIndex > trailIndex;
+    const heat = Math.min(5, gameState.heat + (correctNext || followsKnownTrail ? 0 : 1));
+
+    if (daysLeft <= 0) {
+      setGameState(resetTypewriter({
+        phase: 'lost',
+        daysLeft: 0,
         showTravel: false,
-        typewriterComplete: false,
+        heat,
         conversation: {
-          speaker: "ICI Chief Inspector",
-          text: "Time's up, agent. Zaldy Co has vanished into the shadows. He's probably on a private beach somewhere, flying his $36 million Gulfstream jet while Filipinos wade through floods he was supposed to prevent. The P100 billion is gone. Ghost flood control projects. Rigged deals. Kickbacks. All documented, but he's free. The House revoked his travel authority, but it's too late. This case goes cold... for now. But the Filipino people won't forget."
-        }
-      });
+          speaker: 'Case Cold',
+          meta: 'The trail went quiet',
+          text:
+            'The chase clock hit zero. The suspect slipped through a private door while the paperwork was still warming up. Your clues will stay on file, and the Europe desk will be ready for another run.',
+          avatar: '🧊',
+        },
+      }));
+      setMobilePanel('interview');
       return;
     }
 
+    setGameState(resetTypewriter({
+      currentCity: cityId,
+      previousCity: gameState.currentCity,
+      daysLeft,
+      heat,
+      showTravel: false,
+      visited: [...gameState.visited, cityId],
+      conversation: {
+        speaker: `${nextCity.name}, ${nextCity.country}`,
+        meta: correctNext ? 'Trail is warm' : followsKnownTrail ? 'Case board lead' : 'Possible detour',
+        text: `${nextCity.tagline} ${pick(nextCity.flavor)} ${correctNext || followsKnownTrail ? 'The audit trail is warm here.' : 'Something feels off, but a careful agent can recover.'}`,
+        avatar: correctNext ? '✨' : '🧭',
+      },
+    }));
+    setMobilePanel('interview');
+  };
+
+  const askTravelTo = (cityId: string) => {
+    if (
+      gameState.phase !== 'active'
+      || cityId === gameState.currentCity
+      || !travelOptions.includes(cityId)
+    ) {
+      return;
+    }
+
+    setPendingTravel(cityId);
+  };
+
+  const confirmTravel = () => {
+    if (!pendingTravel) return;
+
+    const destination = pendingTravel;
+    setPendingTravel(null);
+    travelTo(destination);
+  };
+
+  const useGumdropAssist = () => {
+    if (gameState.gumdrops <= 0 || gameState.phase !== 'active') return;
+
+    const nextStop = trailIndex >= 0 && trailIndex < caseFile.trail.length - 1
+      ? cityData[caseFile.trail[trailIndex + 1]].name
+      : currentCity.name;
+    const clue = trailIndex === caseFile.trail.length - 1
+      ? 'The scanner is stuck to this city. That usually means the hideout is nearby.'
+      : `The scanner highlights the next travel lead: ${nextStop}.`;
+    const nextLog: LogEntry = {
+      id: gameState.log.length + 1,
+      city: currentCity.name,
+      source: 'Clue Scanner',
+      clue,
+      type: 'route',
+    };
+
+    setGameState(resetTypewriter({
+      gumdrops: gameState.gumdrops - 1,
+      log: [nextLog, ...gameState.log],
+      showTravel: gameState.showTravel,
+      conversation: {
+        speaker: 'Clue Scanner',
+        meta: `${gameState.gumdrops - 1} assists left`,
+        text: clue,
+        avatar: '📡',
+      },
+    }));
+  };
+
+  const issueWarrant = () => {
+    if (gameState.phase !== 'active') return;
+
+    if (isFinalCity && hasEnoughEvidence) {
+      setGameState(resetTypewriter({
+        phase: 'won',
+        showTravel: false,
+        conversation: {
+          speaker: 'Case Closed',
+          meta: `${currentCity.name} operation complete`,
+          text:
+            'Clean warrant, correct city, excellent detective work. The fugitive is boxed in by passport stamps, witness notes, and a paper trail bright enough to see from the departures board. The case file now moves from cartoon chase to the serious business of lawful accountability.',
+          avatar: '🏆',
+        },
+      }));
+      setMobilePanel('clues');
+      return;
+    }
+
+    const daysLeft = gameState.daysLeft - 1;
+    setGameState(resetTypewriter({
+      daysLeft,
+      heat: Math.min(5, gameState.heat + 1),
+      phase: daysLeft <= 0 ? 'lost' : 'active',
+      conversation: {
+        speaker: daysLeft <= 0 ? 'Case Cold' : 'Warrant Rejected',
+        meta: hasEnoughEvidence ? 'Wrong city' : 'More evidence needed',
+        text: daysLeft <= 0
+          ? 'The failed warrant burned the last day. The suspect vanished before the Europe desk could correct course.'
+          : hasEnoughEvidence
+            ? 'The paperwork is strong, but the city is wrong. Follow the route clues before trying again.'
+            : 'The judge wants at least three solid evidence cards before signing. Interview more witnesses and fill the warrant board.',
+        avatar: daysLeft <= 0 ? '🧊' : '📋',
+      },
+    }));
+    setMobilePanel(hasEnoughEvidence ? 'map' : 'clues');
+  };
+
+  const newCase = () => {
+    const nextCase = createCase();
+    setCaseFile(nextCase);
+    setGameState(buildNewState());
+    setShowHowToPlay(true);
+    setMobilePanel('interview');
+  };
+
+  const toggleTravelMode = () => {
+    if (gameState.phase !== 'active') return;
+
     setGameState({
       ...gameState,
-      currentLocation: locationKey,
-      previousLocation: gameState.currentLocation,
-      visitedLocations: [...gameState.visitedLocations, locationKey],
-      daysRemaining: newDays,
-      showTravel: false,
-      selectedWitness: null,
-      typewriterComplete: false,
-      conversation: {
-        speaker: "Narrator",
-        text: `You arrive in ${locations[locationKey].name}. ${locations[locationKey].description}`
-      }
+      showTravel: !gameState.showTravel,
     });
+    setMobilePanel('map');
   };
 
-  const attemptArrest = () => {
-    if (gameState.currentLocation === suspect.currentLocation) {
-      setGameState({
-        ...gameState,
-        gameWon: true,
-        gameOver: true,
-        typewriterComplete: false,
-        conversation: {
-          speaker: "Victory!",
-          text: `ARREST MADE! You've located Congressman Zaldy Co in ${locations[suspect.currentLocation].name}! The flood control scammer is now in custody and will face justice for stealing P100 billion meant to protect Filipinos from flooding. The ICI will work to recover the assets - the Gulfstream jet, the helicopters, the luxury properties. While he flew around in his $36 million jet, Filipinos drowned. Not anymore. Excellent work, agent! Justice delayed is not justice denied.`
-        }
-      });
-    } else {
-      setGameState({
-        ...gameState,
-        typewriterComplete: false,
-        conversation: {
-          speaker: "False Lead",
-          text: "This isn't the right location. Zaldy Co is not here. Keep investigating and follow the clues. Time is running out!"
-        }
-      });
-    }
-  };
+  const evidenceCount = Object.keys(gameState.evidence).length;
 
-  // Recycle Bin Window Component - Classic Windows 95 Explorer Style
-  const RecycleBinWindow = () => {
-    if (!gameState.showRecycleBin) return null;
-
+  if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center z-50" style={{background: 'rgba(0, 0, 0, 0.3)'}}>
-        <div className="win-window w-full max-w-2xl">
-          {/* Title Bar */}
-          <div className="win-title-bar flex items-center justify-between px-2 py-1">
-            <div className="flex items-center gap-2">
-              <img src="/recycle-bin.png" alt="" className="w-4 h-4" />
-              <span className="text-white font-bold">Recycle Bin</span>
-            </div>
-            <div className="flex gap-1">
-              <button className="w-6 h-6 win-button text-xs font-bold">_</button>
-              <button className="w-6 h-6 win-button text-xs font-bold">□</button>
-              <button 
-                onClick={() => setGameState({...gameState, showRecycleBin: false})}
-                className="w-6 h-6 win-button text-xs font-bold hover:brightness-105"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-
-          {/* Menu Bar */}
-          <div className="flex gap-1 px-2 py-1" style={{background: 'var(--win-gray)', borderBottom: '1px solid var(--win-dark-gray)'}}>
-            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">File</button>
-            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">Edit</button>
-            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">View</button>
-            <button className="px-2 py-0.5 text-xs hover:bg-blue-600 hover:text-white">Help</button>
-          </div>
-
-          {/* Toolbar */}
-          <div className="flex items-center gap-1 px-2 py-1" style={{background: 'var(--win-gray)', borderBottom: '1px solid var(--win-dark-gray)'}}>
-            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Back</button>
-            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Forward</button>
-            <div className="win-separator w-px h-5 mx-1"></div>
-            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Up</button>
-            <div className="win-separator w-px h-5 mx-1"></div>
-            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Cut</button>
-            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Copy</button>
-            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Paste</button>
-            <div className="win-separator w-px h-5 mx-1"></div>
-            <button className="win-button px-2 py-1 text-xs font-bold hover:brightness-105">Delete</button>
-          </div>
-
-          {/* Address Bar */}
-          <div className="flex items-center gap-2 px-2 py-1.5" style={{background: 'var(--win-gray)', borderBottom: '1px solid var(--win-dark-gray)'}}>
-            <span className="text-xs font-bold">Address:</span>
-            <div className="flex-1 win-panel-inset px-2 py-0.5">
-              <span className="text-xs">C:\Recycle Bin</span>
-            </div>
-          </div>
-
-          {/* File List Area */}
-          <div className="p-2" style={{background: 'var(--win-gray)'}}>
-            <div className="win-panel-inset" style={{background: 'white'}}>
-              {/* Column Headers */}
-              <div className="flex items-center border-b" style={{borderColor: 'var(--win-dark-gray)', background: 'var(--win-gray)'}}>
-                <div className="flex-1 px-2 py-1 border-r" style={{borderColor: 'var(--win-white)'}}>
-                  <span className="text-xs font-bold">Name</span>
-                </div>
-                <div className="w-24 px-2 py-1 border-r" style={{borderColor: 'var(--win-white)'}}>
-                  <span className="text-xs font-bold">Size</span>
-                </div>
-                <div className="w-32 px-2 py-1 border-r" style={{borderColor: 'var(--win-white)'}}>
-                  <span className="text-xs font-bold">Type</span>
-                </div>
-                <div className="w-32 px-2 py-1">
-                  <span className="text-xs font-bold">Modified</span>
-                </div>
-              </div>
-
-              {/* File List */}
-              <div className="min-h-[200px]" style={{background: 'white'}}>
-                <div className="flex items-center px-2 py-1 hover:bg-blue-600 hover:text-white cursor-pointer group">
-                  <div className="flex-1 flex items-center gap-2">
-                    <img src="/file-icon.png" alt="File" className="w-4 h-4" />
-                    <span className="text-xs">Romualdez files</span>
-                  </div>
-                  <div className="w-24 px-2">
-                    <span className="text-xs">2.4 MB</span>
-                  </div>
-                  <div className="w-32 px-2">
-                    <span className="text-xs">File Folder</span>
-                  </div>
-                  <div className="w-32 px-2">
-                    <span className="text-xs">10/15/2025</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Status Bar */}
-          <div className="flex items-center justify-between px-2 py-1 border-t-2" style={{background: 'var(--win-gray)', borderColor: 'var(--win-white)'}}>
-            <span className="text-xs">1 object(s)</span>
-            <span className="text-xs">2.4 MB</span>
-          </div>
+      <main className="game-shell loading-mode">
+        <div className="hero-map" aria-hidden="true" />
+        <div className="candy-field" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
+          <span />
         </div>
-      </div>
-    );
-  };
-
-  if (!gameState.gameStarted) {
-    return (
-      <div className="min-h-screen p-4" style={{background: 'var(--win-desktop)'}}>
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <div className="max-w-4xl w-full win-window mb-4">
-          {/* Title Bar */}
-          <div className="win-title-bar flex items-center justify-between px-2 py-1">
-            <div className="flex items-center gap-2">
-              <span className="text-white font-bold">Where in the World is Zaldy Co?</span>
-            </div>
-            <div className="flex gap-1">
-              <button className="w-6 h-6 win-button text-xs font-bold">_</button>
-              <button className="w-6 h-6 win-button text-xs font-bold">□</button>
-              <button className="w-6 h-6 win-button text-xs font-bold">✕</button>
-            </div>
+        <section className="loading-screen" aria-label="Loading game">
+          <div className="loading-logo">
+            <p>Europe Chase</p>
+            <h1>Zaldy Co Quest</h1>
           </div>
-          
-          {/* Window Content */}
-          <div className="p-6">
-            <div className="text-center mb-6">
-              <h1 className="text-4xl font-bold mb-2 text-blue-900">
-                WHERE IN THE WORLD IS
-              </h1>
-              <h2 className="text-5xl font-black mb-4" style={{color: 'var(--win-blue)'}}>
-                ZALDY CO?
-              </h2>
-              <div className="win-panel-inset p-4 mb-4">
-                <p className="text-lg text-black font-bold">
-                  A POLITICAL SATIRE INVESTIGATION
-                </p>
-              </div>
-            </div>
-
-            <div className="win-panel-inset p-4 mb-4">
-              <h3 className="font-bold text-xl mb-3" style={{color: 'var(--win-blue)'}}>CASE FILE: OPERATION BAHA FLOOD</h3>
-              <div className="text-black space-y-1">
-                <p><span className="font-bold">SUSPECT:</span> Congressman Zaldy Co</p>
-                <p><span className="font-bold">POSITION:</span> Former Chair, House Appropriations Committee</p>
-                <p><span className="font-bold">CHARGES:</span> Plunder, Rigged Infrastructure Deals, Ghost Projects</p>
-                <p><span className="font-bold">EMBEZZLED:</span> Over P100,000,000,000</p>
-                <p><span className="font-bold">ASSETS:</span> $36M Gulfstream jet, $16M Helicopter</p>
-                <p><span className="font-bold">LAST SEEN:</span> Left USA August 26, 2025</p>
-              </div>
-            </div>
-
-            <div className="win-panel-inset p-4 mb-4">
-              <h3 className="font-bold text-xl mb-3" style={{color: 'var(--win-blue)'}}>HOW TO PLAY</h3>
-              <ul className="space-y-1 text-black">
-                <li>• Interview witnesses to gather clues</li>
-                <li>• Travel between cities following the trail</li>
-                <li>• Collect evidence about Zaldy Co</li>
-                <li>• Find him within 7 days</li>
-                <li>• Issue arrest warrant at his location</li>
-              </ul>
-            </div>
-
-            <div className="text-center">
-              <button
-                onClick={startGame}
-                className="win-button text-xl px-8 py-3 hover:brightness-105 active:brightness-95"
-              >
-                Start Investigation
-              </button>
-            </div>
+          <div className="loading-capsule">
+            <img src="/game-art/cartoon-dossier-travel.png" alt="" />
           </div>
-        </div>
-
-        {/* Desktop Icons - Below main container */}
-        <div className="flex gap-2 justify-end pr-4 mt-4">
-          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
-            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Recycle Bin</div>
+          <div className="loading-bar" aria-label={`Loading ${loadingProgress}%`}>
+            <div style={{ width: `${loadingProgress}%` }} />
           </div>
-          <div className="desktop-icon">
-            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Discaya files</div>
-          </div>
-        </div>
-      </div>
-
-        {/* Recycle Bin Window */}
-        <RecycleBinWindow />
-      </div>
-    );
-  }
-
-  const currentLocation = locations[gameState.currentLocation];
-
-  if (gameState.gameOver) {
-    return (
-      <div className="min-h-screen p-4" style={{background: 'var(--win-desktop)'}}>
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <div className="max-w-3xl w-full win-window mb-4">
-          <div className="win-title-bar px-2 py-1">
-            <span className="text-white font-bold">{gameState.gameWon ? 'Case Closed!' : 'Case File - Closed'}</span>
-          </div>
-          <div className="p-8" style={{background: 'var(--win-gray)'}}>
-            <div className="text-center">
-              {gameState.gameWon ? (
-                <>
-                  <div className="text-6xl mb-4 animate-bounce">🏆</div>
-                  <h2 className="text-4xl font-bold mb-4" style={{color: 'var(--win-blue)'}}>CASE CLOSED!</h2>
-                </>
-              ) : (
-                <>
-                  <div className="text-6xl mb-4">⚠️</div>
-                  <h2 className="text-4xl font-bold mb-4 text-red-600">CASE COLD</h2>
-                </>
-              )}
-              
-              <div className="win-panel-inset p-6 mb-6">
-                {gameState.conversation && (
-                  <Typewriter 
-                    text={gameState.conversation.text} 
-                    speed={10}
-                    className="text-sm text-black leading-relaxed text-left"
-                    onComplete={() => setGameState({...gameState, typewriterComplete: true})}
-                  />
-                )}
-              </div>
-
-              {gameState.typewriterComplete && (
-                <>
-                  <div className="win-panel-inset p-4 mb-6">
-                    <h3 className="font-bold mb-3 text-lg" style={{color: 'var(--win-blue)'}}>INVESTIGATION SUMMARY</h3>
-                    <div className="text-black space-y-1 text-base">
-                      <p><span className="font-bold">Days Used:</span> {7 - gameState.daysRemaining} of 7</p>
-                      <p><span className="font-bold">Locations Visited:</span> {gameState.visitedLocations.length}</p>
-                      <p><span className="font-bold">Clues Collected:</span> {gameState.cluesCollected.length}</p>
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="win-button text-xl px-8 py-3 font-bold hover:brightness-105"
-                  >
-                    Start New Case
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Icons - Below main container */}
-        <div className="flex gap-2 justify-end pr-4 mt-4">
-          <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
-            <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Recycle Bin</div>
-          </div>
-          <div className="desktop-icon">
-            <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
-            <div className="desktop-icon-label">Discaya files</div>
-          </div>
-        </div>
-      </div>
-
-        {/* Recycle Bin Window */}
-        <RecycleBinWindow />
-      </div>
+          <p className="loading-copy">Polishing glossy buttons · stamping passports · warming up the audit trail</p>
+        </section>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{background: 'var(--win-desktop)'}}>
-      <div className="max-w-7xl mx-auto p-4">
-        <div className="win-window mb-4">
-          <div className="win-title-bar flex items-center justify-between px-2 py-1">
-            <div className="flex items-center gap-2">
-              <span className="text-white font-bold">INTERPOL Agent Terminal v1.0 - Where is Zaldy Co?</span>
-            </div>
-            <div className="flex gap-1">
-              <button className="w-6 h-6 win-button text-xs font-bold">_</button>
-              <button className="w-6 h-6 win-button text-xs font-bold">□</button>
-              <button className="w-6 h-6 win-button text-xs font-bold">✕</button>
-            </div>
-          </div>
-          <div className="p-3" style={{background: 'var(--win-gray)'}}>
-            <div className="flex justify-between items-center">
-              <div>
-                <h1 className="text-2xl font-bold" style={{color: 'var(--win-blue)'}}>WHERE IS ZALDY CO?</h1>
-                <p className="text-sm text-gray-700">Investigation Active</p>
-              </div>
-              <div className="win-panel-inset px-4 py-2 text-center">
-                <p className="text-sm font-bold" style={{color: 'var(--win-blue)'}}>DAYS LEFT</p>
-                <p className="text-3xl font-bold text-red-600">{gameState.daysRemaining}</p>
-              </div>
-            </div>
-          </div>
+    <main className="game-shell">
+      <div className="hero-map" aria-hidden="true" />
+      <div className="candy-field" aria-hidden="true">
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+      <section className="topbar">
+        <div>
+          <p className="eyebrow">International Corruption Desk</p>
+          <h1>Where in Europe is Zaldy Co?</h1>
         </div>
+        <div className="score-strip" aria-label="Case meters">
+          <div className="hud-token days"><b>⏱</b><span>{gameState.daysLeft}</span><small>Days</small></div>
+          <div className="hud-token clues"><b>🔎</b><span>{evidenceCount}/4</span><small>Clues</small></div>
+          <div className="hud-token assists"><b>📡</b><span>{gameState.gumdrops}</span><small>Boosts</small></div>
+          <div className="hud-token heat"><b>🔥</b><span>{gameState.heat}</span><small>Heat</small></div>
+        </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 min-h-[600px]">
-          {/* Left Panel - Location & Evidence */}
-          <div className="win-window flex flex-col">
-            <div className="win-title-bar px-2 py-1">
-              <span className="text-white font-bold">Current Location - {currentLocation.name}</span>
-            </div>
-            <div className="p-4 flex-1 flex flex-col" style={{background: 'var(--win-gray)'}}>
-              
-              <div className="win-border-inset mb-3">
-                <img 
-                  src={currentLocation.image} 
-                  alt={currentLocation.name}
-                  className="w-full h-48 object-cover"
+      <section className={`game-board mobile-panel-${mobilePanel}`}>
+          <div className="action-card hud-panel left-hud">
+            <div className="dialogue-box">
+              <div>
+                <h3>{gameState.conversation.speaker}</h3>
+                <p>{gameState.conversation.meta}</p>
+                <Typewriter
+                  text={gameState.conversation.text}
+                  speed={7}
+                  enableSound={false}
+                  className="dialogue-text"
+                  onComplete={() => setGameState((state) => ({ ...state, typewriterComplete: true }))}
                 />
               </div>
+            </div>
 
-              <div className="win-panel-inset p-3 mb-3">
-                <p className="text-sm text-black">
-                  {currentLocation.description}
-                </p>
-              </div>
+            {gameState.phase === 'active' ? (
+              <>
+                <p className="sidebar-section-title">{gameState.showTravel ? 'Choose a Route' : 'Interview Witnesses'}</p>
 
-              {/* Evidence Dossier */}
-              <div className="win-panel-inset p-3 flex-1">
-                <h3 className="font-bold text-base mb-2" style={{color: 'var(--win-blue)'}}>EVIDENCE DOSSIER</h3>
-                <div className="space-y-2 text-sm">
-                  <div>
-                    <p className="font-bold text-black">APPEARANCE:</p>
-                    <p className="text-gray-700 pl-2 text-xs">
-                      {gameState.evidence.appearance || "[UNKNOWN]"}
-                    </p>
+                {gameState.showTravel ? (
+                  <div className="route-list">
+                    {travelOptions.map((cityId) => {
+                      const city = cityData[cityId];
+                      const hot = trailIndex >= 0 && caseFile.trail[trailIndex + 1] === cityId;
+                      const clueLead = clueLeadCityIds.includes(cityId) && !currentCity.connections.includes(cityId);
+
+                      return (
+                        <button key={cityId} onClick={() => askTravelTo(cityId)} className={`${hot ? 'hot-route ' : ''}${clueLead ? 'lead-route ' : ''}next-action-list`}>
+                          <span style={{ background: city.color }} />
+                          <strong>{city.name}</strong>
+                          <small>{hot ? 'paper trail' : clueLead ? 'clue lead' : '1 day'}</small>
+                        </button>
+                      );
+                    })}
                   </div>
-                  
-                  <div>
-                    <p className="font-bold text-black">HOBBY:</p>
-                    <p className="text-gray-700 pl-2 text-xs">
-                      {gameState.evidence.hobby || "[UNKNOWN]"}
-                    </p>
+                ) : (
+                  <div className="witness-list">
+                    {currentCity.witnesses.map((witness) => (
+                      <button key={witness.name} onClick={() => interviewWitness(witness)} className="next-action-list">
+                        <span>{witness.avatar}</span>
+                        <strong>{witness.name}</strong>
+                        <small>{witness.role} · {witness.spot}</small>
+                      </button>
+                    ))}
                   </div>
-                  
-                  <div>
-                    <p className="font-bold text-black">VEHICLE:</p>
-                    <p className="text-gray-700 pl-2 text-xs">
-                      {gameState.evidence.vehicle || "[UNKNOWN]"}
-                    </p>
-                  </div>
-                  
-                  <div>
-                    <p className="font-bold text-black">TRAIT:</p>
-                    <p className="text-gray-700 pl-2 text-xs">
-                      {gameState.evidence.trait || "[UNKNOWN]"}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-2 pt-2 border-t border-gray-400">
-                  <p className="text-xs font-bold text-center" style={{color: 'var(--win-blue)'}}>CLUES: {gameState.cluesCollected.length}</p>
-                </div>
+                )}
+              </>
+            ) : (
+              <div className="ending-actions">
+                <button className="candy-button primary" onClick={newCase}>
+                  <span>↻</span> New Case
+                </button>
               </div>
+            )}
+          </div>
+
+          <div className={`map-card ${gameState.showTravel ? 'route-mode' : 'clue-mode'}`}>
+            <div className="map-header">
+              <div>
+                <p className="eyebrow">Current City</p>
+                <h2>{currentCity.name}</h2>
+              </div>
+              <span className="country-tag">{currentCity.country}</span>
+            </div>
+            <div className="mini-map">
+              <div className="map-level-badge">
+                <strong>Level {gameState.visited.length}</strong>
+                <span>{gameState.showTravel ? 'Pick a route' : hasRouteLead ? 'Route lead found' : 'Find clues'}</span>
+              </div>
+              {Object.values(cityData).map((city) => {
+                const visited = gameState.visited.includes(city.id);
+                const active = city.id === gameState.currentCity;
+                const connected = travelOptions.includes(city.id);
+                const clueLead = clueLeadCityIds.includes(city.id) && !currentCity.connections.includes(city.id);
+
+                return (
+                  <button
+                    key={city.id}
+                    className={`city-pin ${active ? 'active' : ''} ${visited ? 'visited' : ''} ${connected ? 'connected' : ''} ${clueLead ? 'clue-lead' : ''}`}
+                    style={{ left: `${city.x}%`, top: `${city.y}%`, '--pin-color': city.color } as React.CSSProperties}
+                    onClick={() => askTravelTo(city.id)}
+                    aria-label={city.name}
+                  >
+                    <span>{active ? '✈' : '🧳'}</span>
+                    <small>{city.name}</small>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="city-flavor">{currentCity.tagline}</p>
+            <div className="passport-row">
+              {gameState.visited.slice(-7).map((cityId, index) => (
+                <span key={`${cityId}-${index}`} className="stamp">{cityData[cityId].name}</span>
+              ))}
             </div>
           </div>
 
-          {/* Right Panel - Conversation, Actions & Witnesses */}
-          <div className="win-window flex flex-col">
-            <div className="win-title-bar px-2 py-1">
-              <span className="text-white font-bold">Investigation Console</span>
+          <aside className="dossier-card hud-panel right-hud">
+            <img src="/game-art/cartoon-dossier-travel.png" alt="" />
+            <div className="warrant-status">
+              <strong>{gameState.warrantReady ? 'Warrant Ready' : 'Build Warrant'}</strong>
+              <span>{hasEnoughEvidence ? '3+ evidence cards collected' : `${3 - evidenceCount} more evidence card${3 - evidenceCount === 1 ? '' : 's'} needed`}</span>
             </div>
-            <div className="p-4 flex-1 flex flex-col" style={{background: 'var(--win-gray)'}}>
-              
-              {/* Conversation */}
-              {gameState.conversation && (
-                <div className="win-panel-inset p-3 mb-3 flex-shrink-0">
-                  <div className="flex items-start gap-3 mb-2">
-                    {gameState.conversation.avatarUrl && (
-                      <div className="w-12 h-12 flex-shrink-0">
-                        <img 
-                          src={gameState.conversation.avatarUrl} 
-                          alt={gameState.conversation.speaker}
-                          className="w-12 h-12 rounded border win-border-inset"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1">
-                      <p className="font-bold text-black text-sm">
-                        {gameState.conversation.speaker}
-                      </p>
-                      {gameState.selectedWitness && (
-                        <p className="text-gray-700 text-xs">
-                          {gameState.selectedWitness.type} • {gameState.selectedWitness.location}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <Typewriter 
-                    text={gameState.conversation.text}
-                    speed={10}
-                    className="text-xs text-black whitespace-pre-line leading-relaxed"
-                    onComplete={() => setGameState({...gameState, typewriterComplete: true})}
-                  />
-                </div>
+            <div className="evidence-grid">
+              {(Object.keys(evidenceLabels) as EvidenceKey[]).map((key) => (
+                <article key={key} className={gameState.evidence[key] ? 'filled' : ''}>
+                  <small>{evidenceLabels[key]}</small>
+                  <p>{gameState.evidence[key] ?? '???'}</p>
+                </article>
+              ))}
+            </div>
+            <div className="clue-log">
+              <h3>Clue Log</h3>
+              {gameState.log.length === 0 ? (
+                <p className="empty-log">No clues yet. Shake down the witness buttons.</p>
+              ) : (
+                gameState.log.slice(0, 5).map((entry) => (
+                  <article key={entry.id}>
+                    <strong>{entry.source}</strong>
+                    <span>{entry.city} · {entry.type}</span>
+                    <p>{entry.clue}</p>
+                  </article>
+                ))
               )}
+            </div>
+          </aside>
 
-              {/* Actions */}
-              {gameState.typewriterComplete && (
-                <div className="space-y-2 mb-3">
-                  {gameState.showTravel ? (
-                    <div className="win-panel-inset p-3">
-                      <h4 className="font-bold mb-2 text-sm" style={{color: 'var(--win-blue)'}}>TRAVEL (COST: 1 DAY)</h4>
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
-                        {currentLocation.connections
-                          .filter(locKey => locKey !== gameState.previousLocation)
-                          .map(locKey => {
-                            const isOnTrail = suspect.trail.includes(locKey);
-                            const trailIndex = suspect.trail.indexOf(gameState.currentLocation);
-                            const isNextInTrail = isOnTrail && trailIndex !== -1 && suspect.trail[trailIndex + 1] === locKey;
-                            
-                            return (
-                              <button
-                                key={locKey}
-                                onClick={() => travelTo(locKey)}
-                                className={`w-full text-left win-button p-2 text-xs hover:brightness-105 ${
-                                  isNextInTrail ? 'border-4 border-blue-600' : ''
-                                }`}
-                              >
-                                <p className="font-bold text-black">
-                                  {locations[locKey].name}
-                                  {isNextInTrail && <span className="ml-2 text-blue-600 text-xs">● HOT</span>}
-                                  {isOnTrail && !isNextInTrail && <span className="ml-2 text-gray-600 text-xs">○</span>}
-                                </p>
-                              </button>
-                            );
-                          })}
-                      </div>
-                      <button
-                        onClick={() => setGameState({...gameState, showTravel: false})}
-                        className="w-full win-button py-1 px-2 text-sm hover:brightness-105 mt-2"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setGameState({...gameState, showTravel: true})}
-                        className="w-full win-button py-2 px-4 text-sm font-bold hover:brightness-105"
-                      >
-                        Travel to Another City
-                      </button>
-                      
-                      <button
-                        onClick={attemptArrest}
-                        className="w-full win-button py-2 px-4 text-sm font-bold hover:brightness-105"
-                      >
-                        Issue Arrest Warrant
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Available Witnesses */}
-              <div className="win-panel-inset p-3 flex-1">
-                <h3 className="font-bold text-base mb-2" style={{color: 'var(--win-blue)'}}>AVAILABLE WITNESSES</h3>
-                <div className="space-y-2">
-                  {currentLocation.witnesses.map((witness, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => interviewWitness(witness)}
-                      disabled={gameState.daysRemaining <= 0}
-                      className="w-full text-left win-button p-2 hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <p className="font-bold text-black text-sm">{witness.name}</p>
-                      <p className="text-gray-700 text-xs">{witness.type} • {witness.location}</p>
-                    </button>
-                  ))}
-                </div>
+          {gameState.phase === 'active' && (
+            <nav className="bottom-dock" aria-label="Primary game actions">
+              <button className={`candy-button travel ${hasRouteLead && !gameState.showTravel ? 'next-action' : ''}`} onClick={toggleTravelMode}>
+                <span>✈</span> {gameState.showTravel ? 'Routes' : 'Travel'}
+              </button>
+              <button className={`candy-button boost ${gameState.gumdrops > 0 && gameState.log.length === 0 ? 'next-action' : ''}`} onClick={useGumdropAssist} disabled={gameState.gumdrops <= 0}>
+                <span>📡</span> Scan
+              </button>
+              <button className={`candy-button danger ${gameState.warrantReady ? 'next-action' : ''}`} onClick={issueWarrant}>
+                <span>⚖</span> Warrant
+              </button>
+            </nav>
+          )}
+          <nav className="mobile-tabbar" aria-label="Mobile panel navigation">
+            <button className={mobilePanel === 'interview' ? 'active' : ''} onClick={() => setMobilePanel('interview')}>
+              <span>🗣</span>
+              Interview
+            </button>
+            <button className={mobilePanel === 'map' ? 'active' : ''} onClick={() => setMobilePanel('map')}>
+              <span>🗺</span>
+              Map
+            </button>
+            <button className={mobilePanel === 'clues' ? 'active' : ''} onClick={() => setMobilePanel('clues')}>
+              <span>🔎</span>
+              Clues
+            </button>
+          </nav>
+        </section>
+      {showHowToPlay && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="how-to-title">
+          <section className="how-to-modal">
+            <img src="/game-art/cartoon-dossier-travel.png" alt="" />
+            <div className="how-to-panel" aria-label="How to play">
+              <p className="pill">Quick Briefing</p>
+              <h2 id="how-to-title">How To Play</h2>
+              <div className="tutorial-actions">
+                <button type="button" className="candy-button travel next-action" aria-label="Travel button preview">
+                  <span>✈</span> Travel
+                </button>
+                <button type="button" className="candy-button boost" aria-label="Scan button preview">
+                  <span>📡</span> Scan
+                </button>
+                <button type="button" className="candy-button danger" aria-label="Warrant button preview">
+                  <span>⚖</span> Warrant
+                </button>
+              </div>
+              <p>Interview witnesses, click luggage on the map to travel, and watch for named cities in clues: they unlock special clue-lead routes. Use Scan if the audit trail goes cold, then issue the Warrant after collecting 3 evidence cards.</p>
+              <button className="candy-button primary next-action" onClick={() => setShowHowToPlay(false)}>
+                <span>▶</span> Play
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
+      {pendingTravel && (
+        <div className="modal-backdrop travel-confirm-backdrop" role="dialog" aria-modal="true" aria-labelledby="travel-confirm-title">
+          <section className="travel-confirm-modal">
+            <div className="travel-confirm-icon">✈</div>
+            <div>
+              <p className="pill">Travel Order</p>
+              <h2 id="travel-confirm-title">Fly to {cityData[pendingTravel].name}?</h2>
+              <p>
+                This spends 1 day and stamps your passport. Double-check the clue:
+                a wrong hop adds heat and gives the alleged flood-fund travel circus more time to change gates.
+              </p>
+              <div className="travel-confirm-actions">
+                <button className="candy-button travel next-action" onClick={confirmTravel}>
+                  <span>✈</span> Confirm
+                </button>
+                <button className="candy-button danger" onClick={() => setPendingTravel(null)}>
+                  <span>×</span> Cancel
+                </button>
               </div>
             </div>
-          </div>
+          </section>
         </div>
-      </div>
-
-      {/* Desktop Icons - Below main container */}
-      <div className="flex gap-2 justify-end pr-4 pb-8">
-        <div className="desktop-icon" onClick={() => setGameState({...gameState, showRecycleBin: true})}>
-          <img src="/recycle-bin.png" alt="Recycle Bin" className="desktop-icon-image" />
-          <div className="desktop-icon-label">Recycle Bin</div>
-        </div>
-        <div className="desktop-icon">
-          <img src="/folder.png" alt="Folder" className="desktop-icon-image" />
-          <div className="desktop-icon-label">Discaya files</div>
-        </div>
-      </div>
-
-      {/* Recycle Bin Window */}
-      <RecycleBinWindow />
-    </div>
+      )}
+    </main>
   );
 };
 
-export default ZaldyCoGame;
+export default Game;
