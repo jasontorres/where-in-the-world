@@ -908,6 +908,30 @@ const Game = () => {
   }
 
   const evidenceCount = Object.keys(gameState.evidence).length
+  const caseResult =
+    gameState.phase === 'won'
+      ? {
+          eyebrow: 'Case Closed',
+          title: 'Caught!',
+          icon: '🏆',
+          summary:
+            'Clean warrant, correct city, and enough paper trail to light up the departures board.',
+          detail:
+            'The Europe desk boxes in the fugitive with passport stamps, witness notes, and a very loud audit file.',
+          button: 'New Case',
+        }
+      : gameState.phase === 'lost'
+        ? {
+            eyebrow: 'Case Cold',
+            title: 'Time Ran Out',
+            icon: '🧊',
+            summary:
+              'The chase clock hit zero before the warrant could land in the right city.',
+            detail:
+              'The suspect slipped through another private door. Reset the board and follow the clue trail faster next run.',
+            button: 'Try Again',
+          }
+        : null
 
   if (isLoading) {
     return (
@@ -1309,6 +1333,43 @@ const Game = () => {
                   <span>×</span> Cancel
                 </button>
               </div>
+            </div>
+          </section>
+        </div>
+      )}
+      {caseResult && (
+        <div
+          className="modal-backdrop case-result-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="case-result-title"
+        >
+          <section
+            className={`case-result-modal ${gameState.phase === 'won' ? 'won' : 'lost'}`}
+          >
+            <div className="case-result-icon">{caseResult.icon}</div>
+            <div className="case-result-copy">
+              <p className="pill">{caseResult.eyebrow}</p>
+              <h2 id="case-result-title">{caseResult.title}</h2>
+              <p className="case-result-summary">{caseResult.summary}</p>
+              <p>{caseResult.detail}</p>
+              <div className="case-result-stats">
+                <span>
+                  <strong>{gameState.visited.length}</strong>
+                  Cities
+                </span>
+                <span>
+                  <strong>{evidenceCount}/4</strong>
+                  Evidence
+                </span>
+                <span>
+                  <strong>{gameState.heat}</strong>
+                  Heat
+                </span>
+              </div>
+              <button className="candy-button primary next-action" onClick={newCase}>
+                <span>↻</span> {caseResult.button}
+              </button>
             </div>
           </section>
         </div>
